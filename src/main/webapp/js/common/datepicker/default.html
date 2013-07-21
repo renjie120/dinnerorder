@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>jQuery UI Datepicker - Default functionality</title>
+	<link type="text/css" href="../../themes/base/ui.all.css" rel="stylesheet" />
+	<script type="text/javascript" src="../../jquery-1.3.2.js"></script>
+	<script type="text/javascript" src="../../ui/ui.core.js"></script>
+	<script type="text/javascript" src="../../ui/ui.datepicker.js"></script>
+	<script type="text/javascript" src="../../ui/i18n/ui.datepicker-zh-CN.js"></script>
+	<link type="text/css" href="../demos.css" rel="stylesheet" />
+
+	<script type="text/javascript">
+	$(function() {
+		$("#datepicker").datepicker({closeText: 'X',altField: '#actualDate',altFormat: 'yyyy-mm-dd',appendText: '(yyyy-mm-dd)',showButtonPanel: true,showClearButton:true,minDate: new Date(2009,7,10)});
+
+		$("#start-date").datepicker(
+		{onSelect: function(dateText, inst) {$('#end-date').datepicker('option', 'minDate',new Date(dateText.replace('-',',')));}
+		});
+
+		$("#end-date").datepicker(
+		{onSelect: function(dateText, inst) {$('#start-date').datepicker('option', 'maxDate', new Date(dateText.replace('-',',')));}
+		});
+	});
+
+
+function test()
+{
+
+
+var reg=/^(\d{4})(\/|-)(\d{1,2})\2(\d{1,2})$/;
+var arr=document.getElementById('txtDate').value.match(reg)
+if(arr==null)
+{
+    window.alert("错误的时间格式,请按格式填写\n 如: 1999/10/25 或 1999-10-25");
+    document.getElementById('txtDate').select();
+    document.getElementById('txtDate').focus();
+    return;
+}
+
+alert(arr);
+var tempDate=new Date(arr[1],arr[3]-1,arr[4]);
+if((tempDate.getFullYear()==arr[1]&&(tempDate.getMonth()+1)==arr[3]&&tempDate.getDate()==arr[4])==false)
+{
+   window.alert("错误的时间格式,请按格式填写\n 如: 1999/10/25 或 1999-10-25");
+   document.getElementById('txtDate').select();
+   document.getElementById('txtDate').focus();
+   return;
+}
+   window.alert(document.getElementById('txtDate').value);
+}
+
+
+	</script>
+</head>
+<body>
+
+<div class="demo">
+<input type="text" id="txtDate" onblur="test()" />
+
+
+
+<p>日期测试: <input type="text" id="datepicker"></p>
+
+</div><!-- End demo -->
+
+<div class="demo-description">
+
+<li>
+                            <label for="start-date">开始日期:</label>
+							<input name="start-date" id="start-date" class="date-pick" />
+						</li>
+                        <li>
+                            <label for="end-date">结束日期:</label>
+							<input name="end-date" id="end-date" class="date-pick" />
+						</li>
+
+
+</div><!-- End demo-description -->
+
+</body>
+</html>

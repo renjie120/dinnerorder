@@ -1,0 +1,8 @@
+.myeclipse/
+.settings/
+.mymetadata
+*.bak
+*.class
+target/
+.classpath
+.project
