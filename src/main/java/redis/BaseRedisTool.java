@@ -75,6 +75,21 @@ public class BaseRedisTool {
 			}
 		});
 	}
+	
+	/**
+	 * 返回一个map对应的全部的值.
+	 * @param k
+	 * @return
+	 */
+	public Map<byte[], byte[]> getMapAll(final byte[] k) {
+		return template.execute(new RedisCallback<Map<byte[], byte[]>>() {
+			@Override
+			public Map<byte[], byte[]> doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				return  connection.hGetAll(k); 
+			}
+		});
+	}
 
 	/**
 	 * 返回键值对应的值.
@@ -156,6 +171,23 @@ public class BaseRedisTool {
 			public Boolean doInRedis(RedisConnection connection)
 					throws DataAccessException {
 				return connection.exists(key);
+			}
+
+		});
+	}
+	
+	/**
+	 * 返回一个hash对应键的值.
+	 * @param h
+	 * @param key
+	 * @return
+	 */
+	public byte[] getHashByKey(final byte[] h,final byte[] key) {
+		return template.execute(new RedisCallback<byte[]>() {
+			@Override
+			public byte[] doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				return connection.hGet(h,key);
 			}
 
 		});

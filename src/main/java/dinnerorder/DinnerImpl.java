@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisZSetCommands.Tuple;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.SessionCallback;
@@ -60,7 +62,7 @@ public class DinnerImpl implements IDinner {
 			dinnerId = saveDinner(people);
 		} else {
 			dinnerId = order.getDinnerNameList();
-			//查询对应的汉字显示名称.
+			// 查询对应的汉字显示名称.
 			order.setDinner(tool.getKey(RedisColumn.dinnerName(dinnerId)));
 		}
 		SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
@@ -69,36 +71,38 @@ public class DinnerImpl implements IDinner {
 			public Integer execute(RedisOperations operations)
 					throws DataAccessException {
 				operations.multi();
-				operations.execute(new RedisCallback(){
+				operations.execute(new RedisCallback() {
 
 					@Override
 					public Object doInRedis(RedisConnection connection)
-							throws DataAccessException { 
+							throws DataAccessException {
 						connection.set(RedisColumn.orderDinner(val),
 								(p.getDinner()).getBytes());
 						connection.set(RedisColumn.orderMoney(val),
 								(p.getMoney()).getBytes());
 						connection.set(RedisColumn.orderPeople(val),
 								(peopleId + "").getBytes());
-						//每添加一个菜单，就添加一个权重.
-						connection.zIncrBy(RedisColumn.orderPeopleWithScore(), 1, (peopleId + "").getBytes());
-						//添加一个菜名的权重.
-						connection.zIncrBy(RedisColumn.orderDinnerWithScore(), 1, (dinnerId+"").getBytes());
+						// 每添加一个菜单，就添加一个权重.
+						connection.zIncrBy(RedisColumn.orderPeopleWithScore(),
+								1, (peopleId + "").getBytes());
+						// 添加一个菜名的权重.
+						connection.zIncrBy(RedisColumn.orderDinnerWithScore(),
+								1, (dinnerId + "").getBytes());
 						connection.set(RedisColumn.orderSingle(val),
 								(p.getIsSingle()).getBytes());
 						connection.set(RedisColumn.orderTime(val),
-								(p.getTime()).getBytes());  
+								(p.getTime()).getBytes());
 						connection.sAdd(RedisColumn.peopleToOrder(peopleId),
 								(val + "").getBytes());
 						connection.sAdd(RedisColumn.timeToOrder(p.getTime()),
-								(val + "").getBytes()); 
+								(val + "").getBytes());
 						connection.sAdd(RedisColumn.orderList(),
 								(val + "").getBytes());
 						connection.sAdd(RedisColumn.orderTimeSet(),
 								(p.getTime()).getBytes());
 						return null;
 					}
-					
+
 				});
 				operations.exec();
 				return null;
@@ -113,6 +117,15 @@ public class DinnerImpl implements IDinner {
 	public int saveRecharge(ReCharge recharge) {
 		final int val = tool.generateKey(RedisColumn.snoFactory());
 		final ReCharge p = recharge;
+		byte[] m = tool.getHashByKey(RedisColumn.peopleToRechargeMoney(), (recharge.getPeopleSno()+"").getBytes());
+		final byte[] sum ;
+		if(m==null)
+			sum = recharge.getMoney().getBytes();
+		else{
+			double d = Double.parseDouble(new String(m));
+			d+=Double.parseDouble(recharge.getMoney());
+			sum = (d+"").getBytes();
+		}
 		SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -132,7 +145,10 @@ public class DinnerImpl implements IDinner {
 						// 添加人员到充值记录的映射
 						connection.sAdd(
 								RedisColumn.peopleToRecharge(p.getPeopleSno()),
-								(val + "").getBytes());
+								(val + "").getBytes()); 
+						//设置当前人的缴纳的定金总额.
+						connection.hSet(RedisColumn.peopleToRechargeMoney(), (p.getPeopleSno()+"").getBytes(),
+								sum); 
 						connection.sAdd(
 								RedisColumn.timeToRecharge(p.getTime()),
 								(val + "").getBytes());
@@ -156,13 +172,7 @@ public class DinnerImpl implements IDinner {
 		List<ReCharge> result = new ArrayList<ReCharge>();
 		for (Object o : ll) {
 			int key = Integer.parseInt(new String((byte[]) o));
-			ReCharge p = new ReCharge();
-			p.setMoney(tool.getKey(RedisColumn.rechargeMoney(key)));
-			p.setPeopleSno(Integer.parseInt(tool.getKey(RedisColumn
-					.rechargePeople(key))));
-			p.setSno(key);
-			p.setTime(tool.getKey(RedisColumn.rechargeTime(key)));
-			result.add(p);
+			result.add(getReChargeById(key));
 		}
 		return result;
 	}
@@ -203,10 +213,7 @@ public class DinnerImpl implements IDinner {
 		List<People> result = new ArrayList<People>();
 		for (Object o : ll) {
 			int key = Integer.parseInt(new String((byte[]) o));
-			People p = new People();
-			p.setName(tool.getKey(RedisColumn.peopleName(key)));
-			p.setSno(key);
-			result.add(p);
+			result.add(getPeopleById(key));
 		}
 		return result;
 	}
@@ -217,15 +224,7 @@ public class DinnerImpl implements IDinner {
 		List<Order> result = new ArrayList<Order>();
 		for (Object o : ll) {
 			int key = Integer.parseInt(new String((byte[]) o));
-			Order p = new Order();
-			p.setDinner(tool.getKey(RedisColumn.orderDinner(key)));
-			p.setIsSingle(tool.getKey(RedisColumn.orderSingle(key)));
-			p.setMoney(tool.getKey(RedisColumn.orderMoney(key)));
-			p.setPeopleSno(Integer.parseInt(tool.getKey(RedisColumn
-					.orderPeople(key))));
-			p.setSno(key);
-			p.setTime(tool.getKey(RedisColumn.orderTime(key)));
-			result.add(p);
+			result.add(getOrderById(key));
 		}
 		return result;
 	}
@@ -390,13 +389,7 @@ public class DinnerImpl implements IDinner {
 		List<Menu> result = new ArrayList<Menu>();
 		for (Object o : ll) {
 			int key = Integer.parseInt(new String((byte[]) o));
-			Menu p = new Menu();
-			p.setMenuName(tool.getKey(RedisColumn.menuName(key)));
-			p.setClickTimes((int) tool.getScore(RedisColumn.menuScore(),
-					(byte[]) o));
-			p.setMenuUrl(tool.getKey(RedisColumn.menuUrl(key)));
-			p.setSno(key);
-			result.add(p);
+			result.add(getMenuById(key));
 		}
 		return result;
 	}
@@ -463,6 +456,101 @@ public class DinnerImpl implements IDinner {
 		};
 		tool.getTemplate().execute(sessionCallback);
 		return val;
+	}
+
+	@Override
+	public List<Dinner> getDinnersByRank() {
+		List<Dinner> result = new ArrayList<Dinner>();
+		Set<Tuple> s = tool
+				.getListWithScore(RedisColumn.orderDinnerWithScore());
+		Iterator<Tuple> itt = s.iterator();
+		while (itt.hasNext()) {
+			Tuple tt = itt.next();
+			int _pid = Integer.parseInt(new String(tt.getValue()));
+			Dinner d = getDinnerById(_pid);
+			d.setScore(tt.getScore().intValue());
+			result.add(d);
+		}
+		return result;
+	}
+
+	@Override
+	public List<People> getPeopleByRechargesRank() {
+		List<People> result = new ArrayList<People>();
+		Map<byte[],byte[]> s = tool
+				.getMapAll(RedisColumn.peopleToRechargeMoney());
+		Iterator<Map.Entry<byte[],byte[]>> it = s.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<byte[],byte[]> m = it.next();
+			int pId = Integer.parseInt(new String(m.getKey())); 
+			People p =getPeopleById(pId); 
+			p.setRechargeSum(Double.parseDouble(new String( m.getValue()))); 
+			result.add(p);
+		}
+		Collections.sort(result);
+		return result; 
+	}
+
+	@Override
+	public Double getSumByDay(String time) {
+		Set<byte[]> s = tool.getSet(RedisColumn.timeToOrder(time));
+		double sum = 0;
+		for (Object o : s) {
+			int key = Integer.parseInt(new String((byte[]) o));
+			sum+= Double.parseDouble(tool.getKey(RedisColumn.orderMoney(key)) ); 
+		}
+		return sum;
+	}
+
+	@Override
+	public Dinner getDinnerById(int tim) {
+		Dinner p = new Dinner();
+		p.setDinnerName(tool.getKey(RedisColumn.dinnerName(tim)));
+		p.setSno(tim);
+		return p;
+	}
+
+	@Override
+	public Order getOrderById(int key) {
+		Order p = new Order();
+		p.setDinner(tool.getKey(RedisColumn.orderDinner(key)));
+		p.setIsSingle(tool.getKey(RedisColumn.orderSingle(key)));
+		p.setMoney(tool.getKey(RedisColumn.orderMoney(key)));
+		p.setPeopleSno(Integer.parseInt(tool.getKey(RedisColumn
+				.orderPeople(key))));
+		p.setSno(key);
+		p.setTime(tool.getKey(RedisColumn.orderTime(key)));
+		return p;
+	}
+
+	@Override
+	public People getPeopleById(int tim) {
+		People p = new People();
+		p.setName(tool.getKey(RedisColumn.peopleName(tim)));
+		p.setSno(tim);
+		return p;
+	}
+
+	@Override
+	public Menu getMenuById(int tim) {
+		Menu p = new Menu();
+		p.setMenuName(tool.getKey(RedisColumn.menuName(tim)));
+		p.setClickTimes((int) tool.getScore(RedisColumn.menuScore(),
+				(tim + "").getBytes()));
+		p.setMenuUrl(tool.getKey(RedisColumn.menuUrl(tim)));
+		p.setSno(tim);
+		return p;
+	}
+
+	@Override
+	public ReCharge getReChargeById(int key) {
+		ReCharge p = new ReCharge();
+		p.setMoney(tool.getKey(RedisColumn.rechargeMoney(key)));
+		p.setPeopleSno(Integer.parseInt(tool.getKey(RedisColumn
+				.rechargePeople(key))));
+		p.setSno(key);
+		p.setTime(tool.getKey(RedisColumn.rechargeTime(key)));
+		return p;
 	}
 
 }

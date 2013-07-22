@@ -8,6 +8,15 @@ public class Dinner implements Serializable {
 	private String dinnerName;
 	private int times;
 	private int sno;
+	private int score;
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
 
 	public int getSno() {
 		return sno;

@@ -55,16 +55,17 @@ public class RedisColumn {
 		return (SYSTEM + ORDER_PRE + SPLIT + ORDER_PEOPLE_WITH_SCORE)
 				.getBytes();
 	}
-	
+
 	/**
 	 * 设置订餐的权重的集合。
+	 * 
 	 * @return
 	 */
 	public static byte[] orderDinnerWithScore() {
 		return (SYSTEM + ORDER_PRE + SPLIT + ORDER_DINNER_WITH_SCORE)
 				.getBytes();
 	}
-	
+
 	/**
 	 * 人员对应的全部订单.
 	 * 
@@ -204,6 +205,17 @@ public class RedisColumn {
 	 */
 	public static byte[] peopleToRecharge(int people) {
 		return (SYSTEM + RECHARGE_PRE + SPLIT + people + SPLIT + PEOPLE_TO_RECHARGE)
+				.getBytes();
+	}
+
+	/**
+	 * 人员对应的充值记录的金额. 保存为hashMap
+	 * 
+	 * @param people
+	 * @return
+	 */
+	public static byte[] peopleToRechargeMoney() {
+		return (SYSTEM  + SPLIT + RECHARGE_PRE + SPLIT + PEOPLE_TO_RECHARGE_MONEY)
 				.getBytes();
 	}
 

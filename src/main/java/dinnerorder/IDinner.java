@@ -112,7 +112,39 @@ public interface IDinner {
 	 * 删除充值记录.
 	 * @param recharge
 	 */
-	public void deleteRecharge(String id);
-
-
+	public void deleteRecharge(String id); 
+	
+	/**
+	 * 得到点菜数量排行榜
+	 * @return
+	 */
+	public List<Dinner> getDinnersByRank(); 
+	
+	/**
+	 * 得到人员的充值记录排行榜.
+	 * @return
+	 */
+	public List<People> getPeopleByRechargesRank(); 
+	
+	/**
+	 * 得到某天的订餐金额总量.
+	 * @param tim
+	 * @return
+	 */
+	public Double getSumByDay(String tim); 
+	
+	/**
+	 * 
+	 * @param tim
+	 * @return
+	 */
+	public Dinner getDinnerById(int tim);
+	
+	public Order getOrderById(int tim);
+	
+	public People getPeopleById(int tim);
+	
+	public Menu getMenuById(int tim);
+	
+	public ReCharge getReChargeById(int tim);
 }

@@ -173,27 +173,6 @@ public class DinnerAction {
 		}
 		return null;
 	}
-	
-	public String peopleMoneyRank() {
-		Order order = new Order();
-		order.setDinner(dinnerName);
-		order.setIsSingle(single);
-		order.setMoney(money);
-		order.setDinnerName(dinnerName);
-		order.setDinnerNameList(Integer.parseInt(dinnerNameList));
-		order.setTime(moneyTime);
-		order.setPeopleSno(Integer.parseInt(peopleList));
-		order.setPeopleName(peopleName);
-		dinner.saveOrder(order);
-		HttpServletResponse response = ServletActionContext.getResponse();
-		try {
-			response.setContentType("text/html;charset=GBK");
-			response.getWriter().write("保存订单成功!");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	private String menuName;
 	private String menuUrl;
@@ -214,6 +193,10 @@ public class DinnerAction {
 		this.menuUrl = menuUrl;
 	}
 
+	/**
+	 * 保存菜单.
+	 * @return
+	 */
 	public String saveMenu() {
 		Menu order = new Menu();
 		order.setMenuName(menuName);
@@ -229,11 +212,38 @@ public class DinnerAction {
 		return null;
 	}
 
+	/**
+	 * 根据充值金额排序的人员清单.
+	 * @return
+	 */
+	public String peopleByRechargeMoneyRank() {
+		List<People> p = dinner.getPeopleByRechargesRank();
+		HttpServletRequest request = ServletActionContext.getRequest();
+		request.setAttribute("rankPeople", p);
+		return "newTable";
+	}
+	
+	/**
+	 * 根据菜名的订单数的清单.
+	 * @return
+	 */
+	public String dinnerRank() {
+		List<Dinner> p = dinner.getDinnersByRank();
+		HttpServletRequest request = ServletActionContext.getRequest();
+		request.setAttribute("rankDinner", p);
+		return "newTable";
+	}
+
+	/**
+	 * 点击url
+	 * 
+	 * @return
+	 */
 	public String goUrl() {
 		Menu m = dinner.clickMenu(Integer.parseInt(id));
 		try {
 			ServletActionContext.getResponse().sendRedirect(m.getMenuUrl());
-		} catch (IOException e) { 
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -260,6 +270,10 @@ public class DinnerAction {
 		return null;
 	}
 
+	/**
+	 * 删除订单.
+	 * @return
+	 */
 	public String deleteOrder() {
 		dinner.deleteOrder(id);
 		HttpServletResponse response = ServletActionContext.getResponse();
@@ -272,6 +286,10 @@ public class DinnerAction {
 		return null;
 	}
 
+	/**
+	 * 删除充值记录.
+	 * @return
+	 */
 	public String deleteRecharge() {
 		dinner.deleteRecharge(id);
 		HttpServletResponse response = ServletActionContext.getResponse();

@@ -10,6 +10,7 @@
 	<package name="default" extends="struts-default">
 		<action name="dinner" class="dinner">
 			<result name="dinner">/jsp/dinner.jsp</result>
+			<result name="newTable">/jsp/simpleTable.jsp</result>
 		</action>
 		
 		<action name="redisManager" class="redisManager">
