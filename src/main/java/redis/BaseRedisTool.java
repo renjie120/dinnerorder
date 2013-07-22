@@ -58,9 +58,10 @@ public class BaseRedisTool {
 			}
 		});
 	}
-	
+
 	/**
 	 * 按照顺序返回有权重的list.
+	 * 
 	 * @param k
 	 * @return
 	 */
@@ -69,7 +70,7 @@ public class BaseRedisTool {
 			@Override
 			public Set<Tuple> doInRedis(RedisConnection connection)
 					throws DataAccessException {
-				Set<Tuple> r =  connection.zRevRangeWithScores(k, 0, -1); 
+				Set<Tuple> r = connection.zRevRangeWithScores(k, 0, -1);
 				return r;
 			}
 		});
@@ -77,6 +78,7 @@ public class BaseRedisTool {
 
 	/**
 	 * 返回键值对应的值.
+	 * 
 	 * @param k
 	 * @return
 	 */
@@ -104,6 +106,26 @@ public class BaseRedisTool {
 		if (b != null)
 			return new String(b);
 		return null;
+	}
+
+	/**
+	 * 返回指定的zscore分数.
+	 * 
+	 * @param k
+	 * @param item
+	 * @return
+	 */
+	public double getScore(final byte[] k, final byte[] item) {
+		Double result = template.execute(new RedisCallback<Double>() {
+			@Override
+			public Double doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				return connection.zScore(k, item);
+			}
+		});
+		if (result == null)
+			return 0;
+		return result;
 	}
 
 	/**
@@ -344,5 +366,66 @@ public class BaseRedisTool {
 			}
 		};
 		template.execute(sessionCallback);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void deleteKey(String key) {
+		if (key == null)
+			return; 
+		final String keykey = key;
+
+		template.execute(new RedisCallback() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				connection.del(keykey.getBytes());
+				return null;
+			}
+
+		});
+	}
+	
+	/**
+	 * 删除list里面的一个value.
+	 * @param key
+	 * @param value
+	 */
+	public void removeListValue(String key,String value) {
+		if (key == null||value==null)
+			return; 
+		final String keykey = key;
+		final String va = value;
+
+		template.execute(new RedisCallback() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				connection.lRem(keykey.getBytes(),0,va.getBytes());
+				return null;
+			}
+
+		});
+	}
+	
+	/**
+	 * 删除set里面的值.
+	 * @param key
+	 * @param value
+	 */
+	public void removeSetValue(String key,String value) {
+		if (key == null||value==null)
+			return; 
+		final String keykey = key;
+		final String va = value;
+
+		template.execute(new RedisCallback() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				connection.sRem(keykey.getBytes(),va.getBytes());
+				return null;
+			}
+
+		});
 	}
 }

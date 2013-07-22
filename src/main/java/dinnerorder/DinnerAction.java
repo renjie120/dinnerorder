@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts2.ServletActionContext;
 
+import bean.Dinner;
+import bean.Menu;
 import bean.Order;
 import bean.People;
 import bean.ReCharge;
@@ -25,8 +27,17 @@ public class DinnerAction {
 	private String rechargeMoneyTime;
 	private String rechargePeopleList;
 	private String rechargeMoney;
+	private String id;
 
-	public String getRechargeMoneyTime() { 
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getRechargeMoneyTime() {
 		return rechargeMoneyTime;
 	}
 
@@ -68,6 +79,15 @@ public class DinnerAction {
 
 	private String money;
 	private String dinnerName;
+	private String dinnerNameList;
+
+	public String getDinnerNameList() {
+		return dinnerNameList;
+	}
+
+	public void setDinnerNameList(String dinnerNameList) {
+		this.dinnerNameList = dinnerNameList;
+	}
 
 	public String getDinnerName() {
 		return dinnerName;
@@ -112,14 +132,18 @@ public class DinnerAction {
 	}
 
 	public String init() {
-		List<People> peoples = dinner.getPeoples(); 
-		List<String> allTime = dinner.getOrderTimeSet(); 
+		List<People> peoples = dinner.getPeoples();
+		List<String> allTime = dinner.getOrderTimeSet();
 		List<Order> orders = dinner.getOrders();
+		List<Dinner> dinners = dinner.getDinners();
+		List<Menu> menus = dinner.getMenus();
 		List<ReCharge> rechargs = dinner.getRecharges();
 		HttpServletRequest request = ServletActionContext.getRequest();
-		request.setAttribute("peoples", peoples);
+		request.setAttribute("menus", menus);
 		request.setAttribute("rechargs", rechargs);
+		request.setAttribute("peoples", peoples);
 		request.setAttribute("orders", orders);
+		request.setAttribute("dinners", dinners);
 		request.setAttribute("allTime", allTime);
 		return "dinner";
 	}
@@ -134,15 +158,61 @@ public class DinnerAction {
 		order.setDinner(dinnerName);
 		order.setIsSingle(single);
 		order.setMoney(money);
+		order.setDinnerName(dinnerName);
+		order.setDinnerNameList(Integer.parseInt(dinnerNameList));
 		order.setTime(moneyTime);
 		order.setPeopleSno(Integer.parseInt(peopleList));
-		order.setPeopleName(peopleName); 
+		order.setPeopleName(peopleName);
 		dinner.saveOrder(order);
 		HttpServletResponse response = ServletActionContext.getResponse();
 		try {
 			response.setContentType("text/html;charset=GBK");
-			response.getWriter().write( "保存订单成功!");
+			response.getWriter().write("保存订单成功!");
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private String menuName;
+	private String menuUrl;
+
+	public String getMenuName() {
+		return menuName;
+	}
+
+	public void setMenuName(String menuName) {
+		this.menuName = menuName;
+	}
+
+	public String getMenuUrl() {
+		return menuUrl;
+	}
+
+	public void setMenuUrl(String menuUrl) {
+		this.menuUrl = menuUrl;
+	}
+
+	public String saveMenu() {
+		Menu order = new Menu();
+		order.setMenuName(menuName);
+		order.setMenuUrl(menuUrl);
+		dinner.saveMenu(order);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			response.setContentType("text/html;charset=GBK");
+			response.getWriter().write("保存菜单成功!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String goUrl() {
+		Menu m = dinner.clickMenu(Integer.parseInt(id));
+		try {
+			ServletActionContext.getResponse().sendRedirect(m.getMenuUrl());
+		} catch (IOException e) { 
 			e.printStackTrace();
 		}
 		return null;
@@ -162,7 +232,31 @@ public class DinnerAction {
 		HttpServletResponse response = ServletActionContext.getResponse();
 		try {
 			response.setContentType("text/html;charset=GBK");
-			response.getWriter().write( "充值成功!");
+			response.getWriter().write("充值成功!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String deleteOrder() {
+		dinner.deleteOrder(id);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			response.setContentType("text/html;charset=GBK");
+			response.getWriter().write("删除成功!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String deleteRecharge() {
+		dinner.deleteRecharge(id);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			response.setContentType("text/html;charset=GBK");
+			response.getWriter().write("删除成功!");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

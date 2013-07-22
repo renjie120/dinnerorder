@@ -1,0 +1,50 @@
+@charset "utf-8";
+/* CSS Document */
+
+.mT10 { margin-top:10px;}
+.mT20 { margin-top:20px;}
+body { color:#2e2e2e; height:100%; overflow-y:hidden; overflow-x:auto;}
+.text { height:20px; line-height:20px; padding:2px 0; border:1px solid #d0d0d0; margin:1px; color:#c2c2c2;}
+.text:focus { border:2px solid #ffaf19; margin:0; color:#000;}
+.textarea { height:58px; line-height:18px; padding:2px 0; border:1px solid #d0d0d0; margin:1px; color:#c2c2c2; resize:none;}
+.textarea:focus { border:2px solid #ffaf19; margin:0; color:#000;}
+a.btn { display:inline-block; *display:inline; *zoom:1; /*for ie7*/ vertical-align:middle; padding-left:20px; cursor:pointer; height:26px;}
+a.btn.or { background:url(../images/btn_or.png) no-repeat 0 0;}
+a.btn.gray { background:url(../images/btn_gray.png) no-repeat 0 0;}
+a.btn em { display:inline-block; *display:inline; *zoom:1; /*for ie7*/ vertical-align:middle; line-height:26px; padding-right:20px;}
+a.btn.or em { color:#d06c00; background:url(../images/btn_or.png) 100% -26px;}
+a.btn.gray em { color:#2e2e2e; background:url(../images/btn_gray.png) 100% -26px;}
+a.btn:hover { background-position:0 -52px;}
+a.btn:hover em { background-position:100% -78px;}
+a.tab { display:inline-block; *display:inline; *zoom:1; /*for ie7*/ vertical-align:middle; padding-left:15px; cursor:pointer; height:30px; background:url(../images/tab_bg.png) 0 0;}
+a.tab em { display:inline-block; *display:inline; *zoom:1; /*for ie7*/ vertical-align:middle; line-height:30px; padding-right:15px; background:url(../images/tab_bg.png) 100% -30px;}
+a.tab:hover, a.tab.on { background-position:0 -60px;}
+a.tab:hover em, a.tab.on em { background-position:100% -90px;}
+.select { position:relative; z-index:2; width:230px; height:28px;}
+.select em { display:block; width:28px; height:28px; background:url(../images/select_btn.png) no-repeat right center; position:absolute; right:0; top:0; z-index:3; cursor:pointer;}
+.select .text { cursor:pointer; background:#fff !important;}
+.select .text:focus { border:1px solid #d0d0d0; margin:1px;}
+.select ul { width:226px; display:none; padding-top:1px; background:#fff; border:1px solid #d0d0d0; border-top:none; margin:-2px 0 0 1px; position:relative; z-index:999;}
+.select ul li { padding:0 5px; margin:1px; cursor:pointer;}
+.select ul li:hover { background:#65c4fb; color:#fff;}
+
+.pagination { height:28px; line-height:28px; text-align:right; overflow:hidden; margin-top:10px; padding-right:15px;}
+.pagination i { display:inline-block; *display:inline; *zoom:1; /*for ie7*/ vertical-align:middle; width:14px; height:28px; background:url(../images/pag_icon.jpg) no-repeat 0 0; margin:0 3px;}
+.pagination i.first { background-position:0 0;}
+.pagination i.pre { background-position:0 -28px;}
+.pagination i.next { background-position:0 -84px;}
+.pagination i.last { background-position:0 -56px;}
+.pagination .text { width:20px; height:23px; padding:0; text-align:center;}
+
+.winBox { width:100%; height:100%; position:absolute; top:0; left:0; z-index:9; text-align:center;}
+.winShadow { width:100%; height:100%; position:absolute; top:0; left:0; background:url(../images/win_shadow.png) repeat; z-index:1;}
+.winShadow.tran { background-image:none; background-color:rgba(255,255,255,0);}
+.win { 
+	background:#e5e5e5; border:1px solid #ccc; position:relative; z-index:2; margin:15px; padding:20px;
+	box-shadow:0 0 5px rgba(0,0,0,.5); -webkit-box-shadow:0 0 5px rgba(0,0,0,.5); -moz-box-shadow:0 0 5px rgba(0,0,0,.5); text-align:left !important;
+}
+.win h3 { height:24px; line-height:24px; font-size:18px; font-weight:normal;}
+.win .winCnt { border:1px solid #d0d0d0; margin-top:20px; background:#fff;}
+.win a.close1 { display:block; width:15px; height:15px; cursor:pointer; background:url(../images/close1.jpg) no-repeat; position:absolute; right:15px; top:15px;}
+.win a.close2 { display:block; width:20px; height:20px; cursor:pointer; background:url(../images/close2.jpg) no-repeat; position:absolute; right:15px; top:15px;}
+.win h4 { height:28px; line-height:28px; margin-top:10px; text-align:right; font-weight:normal;}

@@ -2,6 +2,8 @@ package dinnerorder;
 
 import java.util.List;
 
+import bean.Dinner;
+import bean.Menu;
 import bean.Order;
 import bean.People;
 import bean.ReCharge;
@@ -13,6 +15,25 @@ public interface IDinner {
 	 * @param order
 	 */
 	public int saveOrder(Order order);
+	/**
+	 * 添加菜单.
+	 * @param order
+	 * @return
+	 */
+	public int saveMenu(Menu order);
+
+	/**
+	 * 返回全部的菜单.
+	 * @return
+	 */
+	public List<Menu> getMenus();
+
+	/**
+	 * 返回菜单详情.
+	 * @param id
+	 * @return
+	 */
+	public  Menu  clickMenu(int id);
 
 	/**
 	 * 保存充值记录.
@@ -21,11 +42,6 @@ public interface IDinner {
 	 */
 	public int saveRecharge(ReCharge recharge);
 
-	/**
-	 * 删除充值记录.
-	 * @param recharge
-	 */
-	public void deleteRecharge(ReCharge recharge);
 
 	/**
 	 * 查询充值记录.
@@ -41,11 +57,13 @@ public interface IDinner {
 	public int savePeople(People p);
 
 	/**
-	 * 删除人员信息.
-	 * @param order
+	 * 保存菜名.
+	 * @param p
+	 * @return
 	 */
-	public void deletePeople(People order);
+	public int saveDinner(Dinner p);
 
+	
 	/**
 	 * 返回人员信息.
 	 * @return
@@ -74,8 +92,28 @@ public interface IDinner {
 	public List<Order> getOrders();
 
 	/**
+	 * 返回全部的菜名
+	 * @return
+	 */
+	public List<Dinner> getDinners(); 
+	
+	/**
 	 * 删除订单.
 	 * @param order
 	 */
-	public void deleteOrder(Order order);
+	public void deleteOrder(String id);
+	
+	/**
+	 * 删除人员信息.
+	 * @param order
+	 */
+	public void deletePeople(String id);
+	
+	/**
+	 * 删除充值记录.
+	 * @param recharge
+	 */
+	public void deleteRecharge(String id);
+
+
 }

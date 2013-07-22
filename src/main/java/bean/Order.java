@@ -9,6 +9,26 @@ public class Order implements Serializable {
 	private String money;
 	private int peopleSno;
 	private int sno;
+	private String dinnerName;
+	private int dinnerNameList;
+	public String getDinnerName() {
+		return dinnerName;
+	}
+
+	public void setDinnerName(String dinnerName) {
+		this.dinnerName = dinnerName;
+	}
+ 
+
+	public int getDinnerNameList() {
+		return dinnerNameList;
+	}
+
+	public void setDinnerNameList(int dinnerNameList) {
+		this.dinnerNameList = dinnerNameList;
+	}
+
+
 	private String peopleName;
 
 	public String getPeopleName() {

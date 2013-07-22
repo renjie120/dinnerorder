@@ -23,6 +23,15 @@ public class RedisManagerAction {
 	private BaseRedisTool redisTool;
 	private String config;
 	private String keys;
+	private String value;
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
 	private String exists;
 
 	public String getKeys() {
@@ -59,6 +68,20 @@ public class RedisManagerAction {
 		return "manager";
 	}
 
+	public String deleteKey(){
+		redisTool.deleteKey(keys);
+		return null;
+	}
+	
+	public String removeListValue(){
+		redisTool.removeListValue(keys,value);
+		return null;
+	}
+	
+	public String removeSetValue(){
+		redisTool.removeSetValue(keys,value);
+		return null;
+	}
 	/**
 	 * 返回全部的控制台信息.
 	 * 
@@ -88,7 +111,7 @@ public class RedisManagerAction {
 			if(redisTool.existsKey(exists.getBytes()))
 				write("" + redisTool.getJsonData(exists.getBytes()));
 			else
-				write("不存在键对应的值");
+				write("{'type':'none'}");
 		}
 		else
 			write("必须输入键！");

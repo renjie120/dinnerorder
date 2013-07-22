@@ -6,406 +6,529 @@
 	import="org.springframework.data.redis.connection.RedisZSetCommands.Tuple"%>
 <%@ page import="java.util.*"%>
 <html>
-	<head>
-		<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-		<title>redis简易控制台</title>
-		<%
-		BaseRedisTool tool  = (BaseRedisTool)SpringContextUtil.getBean("redisTool");
+<head>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<title>redis简易控制台</title>
+<%
+	BaseRedisTool tool = (BaseRedisTool) SpringContextUtil
+			.getBean("redisTool");
 	String path = request.getContextPath();
 	String basePath = request.getScheme() + "://"
 			+ request.getServerName() + ":" + request.getServerPort()
 			+ path + "/";
-		IDinner	dinner  =(IDinner)SpringContextUtil.getBean("dinnerImpl");
-	List<People> ps = (List<People>)request.getAttribute("peoples");
-	List<ReCharge> rechargs = (List<ReCharge>)request.getAttribute("rechargs");
-	List<Order> orders = (List<Order>)request.getAttribute("orders");
-	List<String> allTime = (List<String>)request.getAttribute("allTime");
+	IDinner dinner = (IDinner) SpringContextUtil.getBean("dinnerImpl");
+	List<People> ps = (List<People>) request.getAttribute("peoples");
+	List<ReCharge> rechargs = (List<ReCharge>) request
+			.getAttribute("rechargs");
+	List<Order> orders = (List<Order>) request.getAttribute("orders");
+	List<Dinner> dinners = (List<Dinner>) request.getAttribute("dinners");
+	List<Menu> menus = (List<Menu>) request.getAttribute("menus");
+	List<String> allTime = (List<String>) request
+			.getAttribute("allTime");
 %>
-		<c:set var="ctx" value="${pageContext.request.contextPath}" />
-		<base href="<%=basePath%>">
-		<script language="javascript" type="text/javascript"
-			src="<%=basePath%>/js/calendar/WdatePicker.js"></script>
-		<LINK rel=stylesheet type=text/css
-			href="<%=basePath%>/js/common/red.css">
-		<script type="text/javascript"
-			src="<%=basePath%>/js/jquery-1.7.1.min.js"></script>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<script type="text/javascript"> 
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<base href="<%=basePath%>">
+<script language="javascript" type="text/javascript"
+	src="<%=basePath%>/js/calendar/WdatePicker.js"></script>
+<LINK rel=stylesheet type=text/css
+	href="<%=basePath%>/js/common/red.css">
+<script type="text/javascript"
+	src="<%=basePath%>/js/jquery-1.7.1.min.js"></script>
+<LINK rel=stylesheet type=text/css href="<%=basePath%>/css/common.css">
+<LINK rel=stylesheet type=text/css href="<%=basePath%>/css/reset.css">
+<LINK rel=stylesheet type=text/css href="<%=basePath%>/css/style.css">
+<script type="text/javascript">
 	$(function() {
-		 var d = new Date();
-	     $('#moneyTime').val(d.asString('yyyy-mm-dd'));  
+		var d = new Date();
+		$('#moneyTime').val(d.asString('yyyy-mm-dd'));
 	});
-	
+
 	/**充值.
 	 */
-	function saveRecharge(){
+	function saveRecharge() {
 		var p = [];
-		if($('#rechargeMoneyTime').val()==''||$('#rechargeMoney').val()||$('#rechargePeopleList').val()=='-1')
-			{
-			alert("数据没有填写完全!");
-			return false;
-			}
-		p.push("rechargeMoneyTime="+$('#rechargeMoneyTime').val()); 
-		p.push("rechargePeopleList="+$('#rechargePeopleList').val());
-		p.push("rechargeMoney="+$('#rechargeMoney').val()); 
-		var param = p.join('&');
-		$.ajax({
-				url :   "dinner!saveRecharge.action",
-				data : param,
-				type : 'POST',
-				dataType : 'json',
-				success:function(x){
-					alert(x);
-					location.reload();
-				} ,
-				error : function(x, textStatus, errorThrown) {
-				alert(x.responseText);
-				 		location.reload();
-				}
-			});
-	}
-	//下订单.
-	function saveOrder(){
-		var p = [];
-		if($('#moneyTime').val()==''||$('#dinnerName').val()||$('#money').val()=='')
-		{
+		if ($('#rechargeMoneyTime').val() == ''
+				|| $('#rechargeMoney').val() == ''
+				|| $('#rechargePeopleList').val() == '-1') {
 			alert("数据没有填写完全!");
 			return false;
 		}
-		if($('#peopleName').val()==''&&$('#peopleList').val()=='-1'){
+		p.push("rechargeMoneyTime=" + $('#rechargeMoneyTime').val());
+		p.push("rechargePeopleList=" + $('#rechargePeopleList').val());
+		p.push("rechargeMoney=" + $('#rechargeMoney').val());
+		var param = p.join('&');
+		$.ajax({
+			url : "dinner!saveRecharge.action",
+			data : param,
+			type : 'POST',
+			dataType : 'json',
+			success : function(x) {
+				alert(x);
+				location.reload();
+				$('#rechargeMoney').val('');
+				$('#rechargePeopleList').val('-1');
+			},
+			error : function(x, textStatus, errorThrown) {
+				alert(x.responseText);
+				location.reload();
+				$('#rechargeMoney').val('');
+				$('#rechargePeopleList').val('-1');
+			}
+		});
+	}
+	//下订单.
+	function saveOrder() {
+		var p = [];
+		if ($('#moneyTime').val() == '' || $('#money').val() == '') {
+			alert("数据没有填写完全!");
+			return false;
+		}
+		if ($('#peopleName').val() == '' && $('#peopleList').val() == '-1') {
 			alert("必须填写人名或者选择人名!");
 			return false;
 		}
-		p.push("moneyTime="+$('#moneyTime').val());
-		p.push("peopleName="+$('#peopleName').val());
-		p.push("peopleList="+$('#peopleList').val());
-		p.push("dinnerName="+$('#dinnerName').val());
-		p.push("money="+$('#money').val());
-		p.push("single="+$('#single').val());
+		if ($('#dinnerName').val() == '' && $('#dinnerNameList').val() == '-1') {
+			alert("必须填写菜名或者选择菜名!");
+			return false;
+		}
+		p.push("moneyTime=" + $('#moneyTime').val());
+		p.push("peopleName=" + $('#peopleName').val());
+		p.push("peopleList=" + $('#peopleList').val());
+		p.push("dinnerNameList=" + $('#dinnerNameList').val());
+		p.push("dinnerName=" + $('#dinnerName').val());
+		p.push("money=" + $('#money').val());
+		p.push("single=" + $('#single').val());
 		var param = p.join('&');
 		$.ajax({
-				url :   "dinner!saveOrder.action",
-				data : param,
-				type : 'POST',
-				dataType : 'json',
-				success:function(x){
-					alert(x);
-					location.reload();
-				} ,
-				error : function(x, textStatus, errorThrown) {
-						alert(x.responseText);
-				 		location.reload();
-				}
-			});
+			url : "dinner!saveOrder.action",
+			data : param,
+			type : 'POST',
+			dataType : 'json',
+			success : function(x) {
+				alert(x);
+				location.reload();
+				$('#money').val('');
+				$('#peopleName').val('');
+				$('#peopleList').val('-1');
+				$('#dinnerName').val('');
+				$('#dinnerNameList').val('-1');
+			},
+			error : function(x, textStatus, errorThrown) {
+				alert(x.responseText);
+				location.reload();
+				$('#money').val('');
+				$('#peopleName').val('');
+				$('#peopleList').val('-1');
+				$('#dinnerName').val('');
+				$('#dinnerNameList').val('-1');
+			}
+		});
 	}
-	
-	function deleteThisRecharge(od){
-		alert(od);
+
+	function deleteThisRecharge(od) {
+		$.ajax({
+			url : "dinner!deleteRecharge.action",
+			data : "id=" + od,
+			type : 'POST',
+			dataType : 'json',
+			success : function(x) {
+				alert(x);
+				location.reload();
+			},
+			error : function(x, textStatus, errorThrown) {
+				alert(x.responseText);
+				location.reload();
+			}
+		});
 	}
-	
-	function deleteThisDinner(od){
-		alert(od);
+
+	function deleteThisDinner(od) {
+		$.ajax({
+			url : "dinner!deleteDinner.action",
+			data : "id=" + od,
+			type : 'POST',
+			dataType : 'json',
+			success : function(x) {
+				alert(x);
+				location.reload();
+			},
+			error : function(x, textStatus, errorThrown) {
+				alert(x.responseText);
+				location.reload();
+			}
+		});
+	}
+
+	function deleteThisOrder(od) { 
+		$.ajax({
+			url : "dinner!deleteOrder.action",
+			data : "id=" + od,
+			type : 'POST',
+			dataType : 'json',
+			success : function(x) {
+				alert(x);
+				location.reload();
+			},
+			error : function(x, textStatus, errorThrown) {
+				alert(x.responseText);
+				location.reload();
+
+			}
+		});
+	}
+
+	function goUrl(sno) {
+		window.open(
+						 'dinner!goUrl.action?id=' + sno,
+						'newwindow',
+						'height=500, width=400, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no');
+		location.reload();
+	}
+	function saveMenu() {
+		var p = [];
+		if ($('#menuName').val() == '' || $('#menuUrl').val() == '') {
+			alert("数据没有填写完全!");
+			return false;
 		}
-		
-	function deleteThisOrder(od){
-		alert(od);
+		p.push("menuName=" + $('#menuName').val());
+		p.push("menuUrl=" + $('#menuUrl').val());
+		var param = p.join('&');
+		$.ajax({
+			url : "dinner!saveMenu.action",
+			data : param,
+			type : 'POST',
+			dataType : 'json',
+			success : function(x) {
+				alert(x);
+				location.reload();
+				$('#menuName').val('');
+				$('#menuName').val('');
+			},
+			error : function(x, textStatus, errorThrown) {
+				alert(x.responseText);
+				location.reload();
+				$('#menuName').val('');
+				$('#menuName').val('');
+			}
+		});
 	}
 </script>
 <style type="text/css">
-<style type="text/css">
-.divClass
-{
-        height:250px;
-        width:100%;
-        overflow:auto;
+.divClass {
+	height: 250px;
+	width: 100%;
+	overflow: auto;
 }
-td
-{
-        height:22px;
-        border-bottom:1px solid black;
-        border-right:1px solid black;
-        cursor:default;
+
+td {
+	height: 22px;
+	border-bottom: 1px solid black;
+	border-right: 1px solid black;
+	cursor: default;
 }
-th
-{
-        height:20px;
-        font-size:12px;
-        font-weight:normal;
-        border-bottom:2px solid black;
-        border-right:1px solid black;
-        background-color:#999999
+
+th {
+	height: 20px;
+	font-size: 12px;
+	font-weight: normal;
+	border-bottom: 2px solid black;
+	border-right: 1px solid black;
+	background-color: #999999
 }
-table
-{
-        borde:1px solid black;
-        font-size:13px;
+
+table {
+	font-size: 13px;
+	border-color: #ff6600;
+	bg-color: #FFD2D2;
+	cell-spacing: 0;
+	cell-padding: 0;
+	align: center;
+	border: 1;
 }
-input
-{
-        border:1px solid black;
+
+input {
+	border: 1px solid black;
 }
-a{
-	font-size:12px;
+
+a {
+	font-size: 12px;
 }
 </style>
 </style>
-	</head>
-	<body>  
-		<a>大家最喜欢吃的菜排名</a>
-		<a>充值排名</a> 
-		<a>花费最大方排名</a><br>
-		<table>
-			<tr>
-				<td>
-					<table>
-						<tr>
-							<td>
-								<table>
-									<td colspan="2">
-										订餐操作
+</head>
+<body>
+	<table>
+		<tr>
+			<td>
+				<table>
+					<tr>
+						<td>
+							<table>
+								<td colspan="2">订餐操作</td>
+								<tr>
+									<td>时间</td>
+									<td><input id="moneyTime" type="text" readOnly='true'>
+										<img onclick="WdatePicker({el:$dp.$('moneyTime')})"
+										src="<%=basePath%>/js/common/datepicker/images/calendar.gif">
 									</td>
-									<tr>
-										<td>
-											时间
-										</td>
-										<td>
-											<input id="moneyTime" type="text" readOnly='true'>
-											<img onclick="WdatePicker({el:$dp.$('moneyTime')})"
-												src="<%=basePath%>/js/common/datepicker/images/calendar.gif">
-										</td>
-									</tr>
-									<tr>
-										<td>
-											人员
-										</td>
-										<td>
-											<input id='peopleName' />
-											<select id='peopleList'>
-												<option value="-1">
-													请选择
-												</option>
-												<%for(People p:ps){%>
-												<option value="<%=p.getSno()%>"><%=p.getName()%></option>
-												<%}%>
-											</select>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											菜名
-										</td>
-										<td>
-											<input id='dinnerName' />
-										</td>
-									</tr>
-									<tr>
-										<td>
-											金额
-										</td>
-										<td>
-											<input id='money' />
-										</td>
-									</tr>
-									<tr>
-										<td>
-											是否单点
-										</td>
-										<td>
-											<select id="single">
-												<option value="0">
-													否
-												</option>
-												<option value="1">
-													是
-												</option>
-											</select>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<button onclick='saveOrder()'>
-												保存
-											</button>
-										</td>
-									</tr>
-								</table>
-							</td>
-							<td>
-								<table>
-									<tr>
-										<td colspan="2">
-											充值操作
-										</td>
-									</tr>
-									<tr>
-										<td>
-											时间
-										</td>
-										<td>
-											<input id="rechargeMoneyTime" type="text" readOnly='true'>
-											<img onclick="WdatePicker({el:$dp.$('rechargeMoneyTime')})"
-												src="<%=basePath%>/js/common/datepicker/images/calendar.gif">
-										</td>
-									</tr>
-									<tr>
-										<td>
-											人员
-										</td>
-										<td>
-											<select id='rechargePeopleList'>
-												<option value="-1">
-													请选择
-												</option>
-												<%for(People p:ps){%>
-												<option value="<%=p.getSno()%>"><%=p.getName()%></option>
-												<%}%>
-											</select>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											金额
-										</td>
-										<td>
-											<input id='rechargeMoney' />
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<button onclick='saveRecharge()'>
-												充值
-											</button>
-										</td>
-									</tr>
-								</table>
-							</td>
-						</tr>
-					</table>
-				</td>
-			</tr>
-			<tr><td colspan="3"><hr></td></tr>
-			<tr>
-				<td>
-					<table style="border:1px">
-						<%//按照订餐人数的次数优先级显示出来全部的人员.
-						Set<Tuple> peopleSet = tool.getListWithScore(RedisColumn.orderPeopleWithScore());
-						 %>
-						<tr>
-							<td colspan="<%=peopleSet.size()+1%>">
-								查看订餐历史
-							</td>
-						</tr>
-						<tr>
-							<td>
-								时间
-							</td>
-							<%	
-									Iterator<Tuple> itt = peopleSet.iterator(); 
-									while(itt.hasNext()){
-										Tuple tt = itt.next();
-										int _pid = Integer.parseInt(new String(tt.getValue()));
-										double score = tt.getScore(); 
-										%>
-							<td><%=tool.getKey(RedisColumn.peopleName(_pid))+"("+score+")"%></td>
-							<%
-									}
-								%>
-
-						</tr>
-
-						<%
-						//打印出来每一天的订餐的情况
-						 for(String t:allTime){%>
-						<tr>
-							<td>
-								<%=t%></td>
-							<%	
-									//按照订餐人数的次数优先级显示出来全部的人员.
-								 	Iterator<Tuple> it2 = peopleSet.iterator(); 
-									while(it2.hasNext()){
-										Tuple tt = it2.next();
-										int _pid = Integer.parseInt(new String(tt.getValue())); 
-										List<String> thisDayOrders = dinner.getOrderByPeopleInOneDay(_pid,t);
-										%>
-							<td  >
+								</tr>
+								<tr>
+									<td>人员</td>
+									<td><input id='peopleName' /> <select id='peopleList'>
+											<option value="-1">请选择</option>
+											<%
+												for (People p : ps) {
+											%>
+											<option value="<%=p.getSno()%>"><%=p.getName()%></option>
+											<%
+												}
+											%>
+									</select></td>
+								</tr>
+								<tr>
+									<td>菜名</td>
+									<td><input id='dinnerName' /> <select id='dinnerNameList'>
+											<option value="-1">请选择</option>
+											<%
+												for (Dinner p : dinners) {
+											%>
+											<option value="<%=p.getSno()%>"><%=p.getDinnerName()%></option>
+											<%
+												}
+											%>
+									</select></td>
+								</tr>
+								<tr>
+									<td>金额</td>
+									<td><input id='money' /></td>
+								</tr>
+								<tr>
+									<td>是否单点</td>
+									<td><select id="single">
+											<option value="0">否</option>
+											<option value="1">是</option>
+									</select></td>
+								</tr>
+								<tr>
+									<td colspan="2">
+										<button onclick='saveOrder()'>保存</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<table>
+								<tr>
+									<td colspan="2">充值操作</td>
+								</tr>
+								<tr>
+									<td>时间</td>
+									<td><input id="rechargeMoneyTime" type="text"
+										readOnly='true'> <img
+										onclick="WdatePicker({el:$dp.$('rechargeMoneyTime')})"
+										src="<%=basePath%>/js/common/datepicker/images/calendar.gif">
+									</td>
+								</tr>
+								<tr>
+									<td>人员</td>
+									<td><select id='rechargePeopleList'>
+											<option value="-1">请选择</option>
+											<%
+												for (People p : ps) {
+											%>
+											<option value="<%=p.getSno()%>"><%=p.getName()%></option>
+											<%
+												}
+											%>
+									</select></td>
+								</tr>
+								<tr>
+									<td>金额</td>
+									<td><input id='rechargeMoney' /></td>
+								</tr>
+								<tr>
+									<td colspan="2">
+										<button onclick='saveRecharge()'>充值</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<table>
+								<tr>
+									<td colspan="2">添加菜单</td>
+								</tr>
+								<tr>
+									<td>菜单名</td>
+									<td><input id='menuName' /></td>
+								</tr>
+								<tr>
+									<td>菜单链接</td>
+									<td><input id='menuUrl' /></td>
+								</tr>
+								<td colspan="2">
+									<button onclick='saveMenu()'>添加</button>
+								</td>
+							</table>
+						</td>
+						<td>
+							<table>
+								<tr>
+									<td colspan="2">趣味排行榜</td>
+								</tr>
+								<tr>
+									<td>排行榜</td>
+									<td>查看次数</td>
+								</tr>
 								<%
-										for(String _o:thisDayOrders){
-										%>
-								<%=tool.getKey(RedisColumn.orderDinner(Integer.parseInt(_o)))+"("
-												+tool.getKey(RedisColumn.orderMoney(Integer.parseInt(_o)))+")"%>
-								 <img src="<%=basePath%>/jsp/onError.gif" onclick="javascript:deleteThisOrder('<%=_o%>')"/>
-								<%}%>
-								
-							</td>
-							<%
+									for (Menu m : menus) {
+								%>
+								<tr>
+									<td><a url="#" onclick="goUrl('<%=m.getSno()%>')"><%=m.getMenuName()%></a></td>
+									<td><%=m.getClickTimes()%></td>
+								</tr>
+								<%
 									}
 								%>
-							
-						</tr>
-						<%}%>
-					</table>
-				</td>
-				<td>
-					<table>
-						<tr>
-							<td>
-								查看订单历史
-							</td>
-						</tr>
-						<tr>
-							<td>
-								时间
-							</td>
-							<td>
-								人员
-							</td>
-							<td>
-								菜名
-							</td>
-							<td>
-								金额
-							</td>
-						</tr>
-						<% for(Order o: orders){%>
-						<tr>
-							<td><%=o.getTime()%></td>
-							<td><%=tool.getKey(RedisColumn.peopleName(o.getPeopleSno()))%>
-							</td>
-							<td><%=o.getDinner()%></td>
-							<td><%=o.getMoney()%> <img src="<%=basePath%>/jsp/onError.gif" onclick="javascript:deleteThisDinner('<%=o.getSno()%>')"/></td>
-						</tr>
-						<%}%>
-					</table>
-				</td>
-				<td>
-					<table>
-						<tr>
-							<td>
-								查看充值历史
-							</td>
-						</tr>
-						<tr>
-							<td>
-								时间
-							</td>
-							<td>
-								人员
-							</td>
-							<td>
-								金额
-							</td>
-						</tr>
-						<% for(ReCharge o: rechargs){%>
-						<tr>
-							<td><%=o.getTime()%></td>
-							<td><%=tool.getKey(RedisColumn.peopleName(o.getPeopleSno()))%>
-							</td>
-							<td><%=o.getMoney()%><img src="<%=basePath%>/jsp/onError.gif" onclick="javascript:deleteThisRecharge('<%=o.getSno()%>')"/></td>
-						</tr>
-						<%}%>
-					</table>
-				</td>
-		</table>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3"><hr></td>
+		</tr>
+		<tr>
+			<td style="valign:top">
+				<table >
+					<%
+						//按照订餐人数的次数优先级显示出来全部的人员.
+						Set<Tuple> peopleSet = tool.getListWithScore(RedisColumn
+								.orderPeopleWithScore());
+					%>
+					<tr>
+						<td colspan="<%=peopleSet.size() + 1%>">查看订餐历史</td>
+					</tr>
+					<tr>
+						<td>时间</td>
+						<%
+							Iterator<Tuple> itt = peopleSet.iterator();
+							while (itt.hasNext()) {
+								Tuple tt = itt.next();
+								int _pid = Integer.parseInt(new String(tt.getValue()));
+								double score = tt.getScore();
+								if (score < 1)
+									continue;
+						%>
+						<td><%=tool.getKey(RedisColumn.peopleName(_pid))%></td>
+						<%
+							}
+						%>
 
-	</body>
+					</tr>
+
+					<%
+						//打印出来每一天的订餐的情况
+						for (String t : allTime) {
+							if (!tool.existsKey(RedisColumn.timeToOrder(t))) {
+								continue;
+							}
+					%>
+					<tr>
+						<td><%=t%></td>
+						<%
+							//按照订餐人数的次数优先级显示出来全部的人员.
+								Iterator<Tuple> it2 = peopleSet.iterator();
+								while (it2.hasNext()) {
+									Tuple tt = it2.next();
+									int _pid = Integer.parseInt(new String(tt.getValue()));
+									if (tt.getScore() < 1)
+										continue;
+									List<String> thisDayOrders = dinner
+											.getOrderByPeopleInOneDay(_pid, t);
+						%>
+						<td>
+							<%
+								for (String _o : thisDayOrders) {
+							%> <%=tool.getKey(RedisColumn.orderDinner(Integer
+								.parseInt(_o)))
+								+ "("
+								+ tool.getKey(RedisColumn.orderMoney(Integer
+										.parseInt(_o))) + ")"%> <img
+							src="<%=basePath%>/jsp/onError.gif"
+							onclick="javascript:deleteThisOrder('<%=_o%>')" /> <%
+ 	}
+ %>
+
+						</td>
+						<%
+							}
+						%>
+
+					</tr>
+					<%
+						}
+					%>
+				</table>
+			</td>
+			<td style="valign:top">
+				<table>
+					<tr>
+						<td colspan="5">查看订单历史</td>
+					</tr>
+					<tr>
+						<td>时间</td>
+						<td>人员</td>
+						<td>菜名</td>
+						<td>金额</td>
+						<td>删除</td>
+					</tr>
+					<%
+						for (Order o : orders) {
+					%>
+					<tr>
+						<td><%=o.getTime()%></td>
+						<td><%=tool.getKey(RedisColumn.peopleName(o.getPeopleSno()))%>
+						</td>
+						<td><%=o.getDinner()%></td>
+						<td><%=o.getMoney()%></td>
+						<td><img src="<%=basePath%>/jsp/onError.gif"
+							onclick="javascript:deleteThisOrder('<%=o.getSno()%>')" /></td>
+					</tr>
+					<%
+						}
+					%>
+				</table>
+			</td>
+			<td style="valign:top">
+				<table>
+					<tr>
+						<td colspan="4">查看充值历史</td>
+					</tr>
+					<tr>
+						<td>时间</td>
+						<td>人员</td>
+						<td>金额</td>
+						<td>删除</td>
+					</tr>
+					<%
+						for (ReCharge o : rechargs) {
+					%>
+					<tr>
+						<td><%=o.getTime()%></td>
+						<td><%=tool.getKey(RedisColumn.peopleName(o.getPeopleSno()))%>
+						</td>
+						<td><%=o.getMoney()%></td>
+						<td><img src="<%=basePath%>/jsp/onError.gif"
+							onclick="javascript:deleteThisRecharge('<%=o.getSno()%>')" /></td>
+					</tr>
+					<%
+						}
+					%>
+				</table>
+			</td>
+	</table>
+
+</body>
 </html>

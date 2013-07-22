@@ -18,8 +18,7 @@
 
 	} 
 	$(function() {
-		$('#seeConfig').click(function() {
-			alert(1);
+		$('#seeConfig').click(function() { 
 			var s = $('[name=config]').val();
 			$.ajax({
 						url : "redisManager!getConfig.action",
@@ -49,35 +48,37 @@
 								success : function(d) {
 									 eval("var data="+d);
 									if(data.type=='string'){
-										$('#existsTable').prepend('<tr><td colspan="2">'+$('[name=exists]').val()+'</td></tr><tr><td>字符串</td><td>'+data.value+'</td></tr>');
+										$('#existsTable').prepend('<tr ><td  >'+$('[name=exists]').val()+'</td><td ><img src="<%=basePath%>/jsp/onError.gif" onclick="deletethis(this)"/></td></tr><tr><td>字符串</td><td>'+data.value+'</td></tr>');
 									}else if(data.type=='hash'){ 
 										 var buf = [];
 										 buf.push("<tr><td>类型</td><td>hash</td></tr>");
 										 for(var ii in data.value){
 											 	buf.push("<tr><td>"+data.value[ii].key+"</td><td>"+data.value[ii].value+"</td></tr>");  
 										 }
-										 $('#existsTable').prepend("<tr><td colspan='2'>"+$('[name=exists]').val()+"</td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr><td  >"+$('[name=exists]').val()+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
 									}else if(data.type=='list'){ 
 										 var buf = [];
+										 var _v = $('[name=exists]').val();
 										 buf.push("<tr><td>类型</td><td>list</td></tr>");
 										 for(var ii in data.value){
-											 	buf.push("<tr><td colspan='2'>"+data.value[ii]+"</td></tr>");   
+											 	buf.push("<tr><td >"+data.value[ii]+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' lv='"+_v+"' onclick='removeList(this)'/></td></tr>");   
 										 }
-										 $('#existsTable').prepend("<tr><td colspan='2'>"+$('[name=exists]').val()+"</td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr><td >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
 									}else if(data.type=='set'){ 
 										 var buf = [];
+										 var _v = $('[name=exists]').val();
 										 buf.push("<tr><td>类型</td><td>set</td></tr>");
 										 for(var ii in data.value){
-											 	buf.push("<tr><td colspan='2'>"+data.value[ii]+"</td></tr>");   
+											 	buf.push("<tr><td >"+data.value[ii]+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' lv='"+_v+"' onclick='removeSet(this)'/></td></tr>");   
 										 }
-										 $('#existsTable').prepend("<tr><td colspan='2'>"+$('[name=exists]').val()+"</td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr><td >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
 									}else if(data.type=='zset'){ 
 										 var buf = [];
 										 buf.push("<tr><td>类型</td><td>zset</td></tr><tr><td>键</td><td>分数</td></tr>");
 										 for(var ii in data.value){
 											 	buf.push("<tr><td>"+data.value[ii].value+"</td><td>"+data.value[ii].score+"</td></tr>");   
 										 }
-										 $('#existsTable').prepend("<tr><td colspan='2'>"+$('[name=exists]').val()+"</td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr><td  >"+$('[name=exists]').val()+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
 									}else{
 										 $('#existsTable').prepend("<tr><td colspan='2'>"+$('[name=exists]').val()+"</td></tr>"+'<tr><td>没有查找到</td></tr>');
 									}
@@ -94,7 +95,7 @@
 											 eval("var data="+d);
 											 var i =0;
 											 var buf = [];
-											 buf.push("<tr><td>"+$('[name=keys]').val()+"</td></tr>");
+											 buf.push("<tr><td >"+$('[name=keys]').val()+"</td></tr>");
 											 for(var ii in data){ 
 													buf.push("<tr><td>"+data[ii]+"</td></tr>");   
 											 }
@@ -103,6 +104,50 @@
 									});
 						});
 	});
+	
+	function deletethis(obj){
+		if(confirm('确定删除么?')){
+			var v = $(obj).parent().prev().html();
+			 $.ajax({
+				url : "redisManager!deleteKey.action",
+				data : "keys=" + v,
+				type : "post",
+				success : function(d) {
+					 $(obj).parent().parent().remove();
+				}
+			}); 
+		}
+	}
+	
+	function removeList(obj){
+		if(confirm('确定删除么?')){
+			var v = $(obj).parent().prev().html();
+			var lv = $(obj).attr('lv');
+			 $.ajax({
+				url : "redisManager!removeListValue.action",
+				data : "value=" + v+"&keys="+lv,
+				type : "post",
+				success : function(d) {
+					 $(obj).parent().parent().remove();
+				}
+			}); 
+		}
+	}
+	
+	function removeSet(obj){
+		if(confirm('确定删除么?')){
+			var v = $(obj).parent().prev().html();
+			var lv = $(obj).attr('lv');
+			 $.ajax({
+				url : "redisManager!removeSetValue.action",
+				data : "value=" + v+"&keys="+lv,
+				type : "post",
+				success : function(d) {
+					 $(obj).parent().parent().remove();
+				}
+			}); 
+		}
+	}
 </script>
 </head>
 <body>
