@@ -173,6 +173,27 @@ public class DinnerAction {
 		}
 		return null;
 	}
+	
+	public String peopleMoneyRank() {
+		Order order = new Order();
+		order.setDinner(dinnerName);
+		order.setIsSingle(single);
+		order.setMoney(money);
+		order.setDinnerName(dinnerName);
+		order.setDinnerNameList(Integer.parseInt(dinnerNameList));
+		order.setTime(moneyTime);
+		order.setPeopleSno(Integer.parseInt(peopleList));
+		order.setPeopleName(peopleName);
+		dinner.saveOrder(order);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			response.setContentType("text/html;charset=GBK");
+			response.getWriter().write("保存订单成功!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	private String menuName;
 	private String menuUrl;

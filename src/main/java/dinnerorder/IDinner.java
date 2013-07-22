@@ -40,8 +40,7 @@ public interface IDinner {
 	 * 返回流水号.
 	 * @param recharge
 	 */
-	public int saveRecharge(ReCharge recharge);
-
+	public int saveRecharge(ReCharge recharge); 
 
 	/**
 	 * 查询充值记录.
