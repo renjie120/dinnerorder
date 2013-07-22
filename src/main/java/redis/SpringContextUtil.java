@@ -1,10 +1,17 @@
-﻿package redis;
+package redis;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+/**
+ * 获取spring配置文件里面指定bean的工具类.
+* @title: SpringContextUtil 
+* @description：TODO
+* @author： lishuiqing
+* @date： 2013-4-27 下午6:33:05
+ */
 public class SpringContextUtil implements ApplicationContextAware {
 	private static ApplicationContext applicationContext; // Spring应用上下文环境
 

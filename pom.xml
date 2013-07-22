@@ -10,15 +10,16 @@
 	<properties>
 		<spring.framework.version>3.0.5.RELEASE</spring.framework.version>
 		<java.home>C:\Program Files\Java\jdk1.6.0_10</java.home>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<struts2.version>2.3.8</struts2.version>
 		<junit.version>3.8.1</junit.version>
+		<redis.version>1.0.1.RELEASE</redis.version>
 	</properties>
-	<dependencies> 
+	<dependencies>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-redis</artifactId>
-			<version>1.0.5.RELEASE</version> 
+			<version>${redis.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -31,36 +32,36 @@
 			<artifactId>spring-core</artifactId>
 			<version>${spring.framework.version}</version>
 		</dependency>
-		<dependency>  
-            <groupId>org.springframework</groupId>  
-            <artifactId>spring-expression</artifactId>  
-            <version>${spring.framework.version}</version>  
-        </dependency>  
-		<dependency>  
-            <groupId>org.springframework</groupId>  
-            <artifactId>spring-beans</artifactId>  
-            <version>${spring.framework.version}</version>  
-        </dependency>  
-         <dependency>  
-            <groupId>org.springframework</groupId>  
-            <artifactId>spring-aop</artifactId>  
-            <version>${spring.framework.version}</version>  
-        </dependency>  
-        <dependency>  
-            <groupId>org.springframework</groupId>  
-            <artifactId>spring-oxm</artifactId>  
-            <version>${spring.framework.version}</version>  
-        </dependency>  
-        <dependency>  
-            <groupId>org.springframework</groupId>  
-            <artifactId>spring-context-support</artifactId>  
-            <version>${spring.framework.version}</version>  
-        </dependency>  
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${spring.framework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring.framework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${spring.framework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-oxm</artifactId>
+			<version>${spring.framework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.framework.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${spring.framework.version}</version>
-		</dependency> 
+		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
@@ -154,28 +155,38 @@
 		</dependency>
 
 	</dependencies>
-
-	<build>
+<build>
 		<finalName>dinnerorder</finalName>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat6-maven-plugin</artifactId>
-				<version>2.1</version>
-				<executions>
-					<execution>
-						<id>tomcat-run</id>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<phase>package</phase>
-						<configuration>
-							<path>/dinnerorder</path>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-		</plugins>
-	</build>
+		<outputDirectory>src/main/webapp/WEB-INF/classes</outputDirectory>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.tomcat.maven</groupId>
+					<artifactId>tomcat6-maven-plugin</artifactId>
+					<version>2.0-beta-1</version>
+					<configuration>
+						<contextReloadable>false</contextReloadable>
+						<port>8883</port>
+						<uriEncoding>UTF-8</uriEncoding>
+						<path>/dinnerorder</path>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build> 
 </project>

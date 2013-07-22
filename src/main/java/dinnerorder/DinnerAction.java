@@ -26,7 +26,7 @@ public class DinnerAction {
 	private String rechargePeopleList;
 	private String rechargeMoney;
 
-	public String getRechargeMoneyTime() {
+	public String getRechargeMoneyTime() { 
 		return rechargeMoneyTime;
 	}
 

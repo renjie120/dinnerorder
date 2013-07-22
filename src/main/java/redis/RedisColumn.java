@@ -8,6 +8,7 @@ package redis;
  */
 public class RedisColumn {
 	public final static String SPLIT = ":";
+	public final static String SYSTEM = "dinnerorder:"; 
 	public final static String SNO_FACTORY = "diner_sno";
 	public final static String ORDER_PRE = "order";
 	public final static String ORDER_TIME = "timer";
@@ -26,20 +27,20 @@ public class RedisColumn {
 	public final static String ORDER_SUM_MONEY = "sumMoney";
 
 	public static byte[] order() {
-		return ORDER_PRE.getBytes();
+		return (SYSTEM+ORDER_PRE).getBytes();
 	}
 
 	public static byte[] snoFactory() {
-		return SNO_FACTORY.getBytes();
+		return (SYSTEM+SNO_FACTORY).getBytes();
 	}
 
 	public static byte[] peopleAndTimeToOrder(int people,String time) {
-		return (ORDER_PRE + SPLIT + people+ SPLIT + time + SPLIT + PEOPLE_AND_TIME_TO_ORDER)
+		return (SYSTEM+ORDER_PRE + SPLIT + people+ SPLIT + time + SPLIT + PEOPLE_AND_TIME_TO_ORDER)
 				.getBytes();
 	}
 	
 	public static byte[] orderTime(int sno) {
-		return (ORDER_PRE + SPLIT + sno + SPLIT + ORDER_TIME).getBytes();
+		return (SYSTEM+ORDER_PRE + SPLIT + sno + SPLIT + ORDER_TIME).getBytes();
 	}
 
 	/**
@@ -49,7 +50,7 @@ public class RedisColumn {
 	 * @return
 	 */
 	public static byte[] orderPeopleWithScore() {
-		return (ORDER_PRE + SPLIT + ORDER_PEOPLE_WITH_SCORE).getBytes();
+		return (SYSTEM+ORDER_PRE + SPLIT + ORDER_PEOPLE_WITH_SCORE).getBytes();
 	}
 
 	/**
@@ -59,7 +60,7 @@ public class RedisColumn {
 	 * @return
 	 */
 	public static byte[] peopleToOrder(int people) {
-		return (ORDER_PRE + SPLIT + people + SPLIT + PEOPLE_TO_ORDER)
+		return (SYSTEM+ORDER_PRE + SPLIT + people + SPLIT + PEOPLE_TO_ORDER)
 				.getBytes();
 	}
 
@@ -70,7 +71,7 @@ public class RedisColumn {
 	 * @return
 	 */
 	public static byte[] timeToOrder(String time) {
-		return (ORDER_PRE + SPLIT + time + SPLIT + TIME_TO_ORDER).getBytes();
+		return (SYSTEM+ORDER_PRE + SPLIT + time + SPLIT + TIME_TO_ORDER).getBytes();
 	}
 
 	/**
@@ -80,7 +81,7 @@ public class RedisColumn {
 	 * @return
 	 */
 	public static byte[] orderTimeSet() {
-		return (ORDER_PRE + SPLIT + ORDER_TIME_SET).getBytes();
+		return (SYSTEM+ORDER_PRE + SPLIT + ORDER_TIME_SET).getBytes();
 	}
 
 	/**
@@ -90,27 +91,27 @@ public class RedisColumn {
 	 * @return
 	 */
 	public static byte[] timeToMoney(String time) {
-		return (ORDER_PRE + SPLIT + time + SPLIT + ORDER_SUM_MONEY).getBytes();
+		return (SYSTEM+ORDER_PRE + SPLIT + time + SPLIT + ORDER_SUM_MONEY).getBytes();
 	}
 
 	public static byte[] orderMoney(int sno) {
-		return (ORDER_PRE + SPLIT + sno + SPLIT + ORDER_MONEY).getBytes();
+		return (SYSTEM+ORDER_PRE + SPLIT + sno + SPLIT + ORDER_MONEY).getBytes();
 	}
 
 	public static byte[] orderPeople(int sno) {
-		return (ORDER_PRE + SPLIT + sno + SPLIT + ORDER_PEOPLE).getBytes();
+		return (SYSTEM+ORDER_PRE + SPLIT + sno + SPLIT + ORDER_PEOPLE).getBytes();
 	}
 
 	public static byte[] orderSingle(int sno) {
-		return (ORDER_PRE + SPLIT + sno + SPLIT + ORDER_SINGLE).getBytes();
+		return (SYSTEM+ORDER_PRE + SPLIT + sno + SPLIT + ORDER_SINGLE).getBytes();
 	}
 
 	public static byte[] orderDinner(int sno) {
-		return (ORDER_PRE + SPLIT + sno + SPLIT + ORDER_DINNER).getBytes();
+		return (SYSTEM+ORDER_PRE + SPLIT + sno + SPLIT + ORDER_DINNER).getBytes();
 	}
 
 	public static byte[] orderList() {
-		return (ORDER_PRE + SPLIT + ORDER_LIST).getBytes();
+		return (SYSTEM+ORDER_PRE + SPLIT + ORDER_LIST).getBytes();
 	}
 
 	public final static String PEOPLE_PRE = "people";
@@ -119,15 +120,15 @@ public class RedisColumn {
 	public final static String PEOPLE_LIST = "peoples";
 
 	public static byte[] people() {
-		return (PEOPLE_PRE).getBytes();
+		return (SYSTEM+PEOPLE_PRE).getBytes();
 	}
 
 	public static byte[] peopleName(int sno) {
-		return (PEOPLE_PRE + SPLIT + sno + SPLIT + PEOPLE_NAME).getBytes();
+		return (SYSTEM+PEOPLE_PRE + SPLIT + sno + SPLIT + PEOPLE_NAME).getBytes();
 	}
 
 	public static byte[] peopleList() {
-		return (PEOPLE_PRE + SPLIT + PEOPLE_LIST).getBytes();
+		return (SYSTEM+PEOPLE_PRE + SPLIT + PEOPLE_LIST).getBytes();
 	}
 
 	public final static String RECHARGE_SNO = "sno";
@@ -147,7 +148,7 @@ public class RedisColumn {
 	 * @return
 	 */
 	public static byte[] peopleToRecharge(int people) {
-		return (RECHARGE_PRE + SPLIT + people + SPLIT + PEOPLE_TO_RECHARGE)
+		return (SYSTEM+RECHARGE_PRE + SPLIT + people + SPLIT + PEOPLE_TO_RECHARGE)
 				.getBytes();
 	}
 
@@ -158,7 +159,7 @@ public class RedisColumn {
 	 * @return
 	 */
 	public static byte[] peopleToMoney(int people) {
-		return (RECHARGE_PRE + SPLIT + people + SPLIT + PEOPLE_TO_RECHARGE_MONEY)
+		return (SYSTEM+RECHARGE_PRE + SPLIT + people + SPLIT + PEOPLE_TO_RECHARGE_MONEY)
 				.getBytes();
 	}
 
@@ -169,29 +170,29 @@ public class RedisColumn {
 	 * @return
 	 */
 	public static byte[] timeToRecharge(String time) {
-		return (RECHARGE_PRE + SPLIT + time + SPLIT + TIME_TO_RECHARGE)
+		return (SYSTEM+RECHARGE_PRE + SPLIT + time + SPLIT + TIME_TO_RECHARGE)
 				.getBytes();
 	}
 
 	public static byte[] recharge() {
-		return (RECHARGE_PRE).getBytes();
+		return (SYSTEM+RECHARGE_PRE).getBytes();
 	}
 
 	public static byte[] rechargePeople(int sno) {
-		return (RECHARGE_PRE + SPLIT + sno + SPLIT + RECHARGE_PEOPLE)
+		return (SYSTEM+RECHARGE_PRE + SPLIT + sno + SPLIT + RECHARGE_PEOPLE)
 				.getBytes();
 	}
 
 	public static byte[] rechargeTime(int sno) {
-		return (RECHARGE_PRE + SPLIT + sno + SPLIT + RECHARGE_TIME).getBytes();
+		return (SYSTEM+RECHARGE_PRE + SPLIT + sno + SPLIT + RECHARGE_TIME).getBytes();
 	}
 
 	public static byte[] rechargeList() {
-		return (PEOPLE_PRE + SPLIT + RECHARGE_LIST).getBytes();
+		return (SYSTEM+PEOPLE_PRE + SPLIT + RECHARGE_LIST).getBytes();
 	}
 
 	public static byte[] rechargeMoney(int sno) {
-		return (RECHARGE_PRE + SPLIT + sno + SPLIT + RECHARGE_MONEY).getBytes();
+		return (SYSTEM+RECHARGE_PRE + SPLIT + sno + SPLIT + RECHARGE_MONEY).getBytes();
 	}
 
 }

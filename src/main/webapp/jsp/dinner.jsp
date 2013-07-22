@@ -40,9 +40,13 @@
 	 */
 	function saveRecharge(){
 		var p = [];
+		if($('#rechargeMoneyTime').val()==''||$('#rechargeMoney').val()||$('#rechargePeopleList').val()=='-1')
+			{
+			alert("数据没有填写完全!");
+			return false;
+			}
 		p.push("rechargeMoneyTime="+$('#rechargeMoneyTime').val()); 
 		p.push("rechargePeopleList="+$('#rechargePeopleList').val());
-		p.push("dinnerName="+$('#dinnerName').val());
 		p.push("rechargeMoney="+$('#rechargeMoney').val()); 
 		var param = p.join('&');
 		$.ajax({
@@ -63,6 +67,15 @@
 	//下订单.
 	function saveOrder(){
 		var p = [];
+		if($('#moneyTime').val()==''||$('#dinnerName').val()||$('#money').val()=='')
+		{
+			alert("数据没有填写完全!");
+			return false;
+		}
+		if($('#peopleName').val()==''&&$('#peopleList').val()=='-1'){
+			alert("必须填写人名或者选择人名!");
+			return false;
+		}
 		p.push("moneyTime="+$('#moneyTime').val());
 		p.push("peopleName="+$('#peopleName').val());
 		p.push("peopleList="+$('#peopleList').val());
@@ -80,14 +93,67 @@
 					location.reload();
 				} ,
 				error : function(x, textStatus, errorThrown) {
-				alert(x.responseText);
+						alert(x.responseText);
 				 		location.reload();
 				}
 			});
 	}
+	
+	function deleteThisRecharge(od){
+		alert(od);
+	}
+	
+	function deleteThisDinner(od){
+		alert(od);
+		}
+		
+	function deleteThisOrder(od){
+		alert(od);
+	}
 </script>
+<style type="text/css">
+<style type="text/css">
+.divClass
+{
+        height:250px;
+        width:100%;
+        overflow:auto;
+}
+td
+{
+        height:22px;
+        border-bottom:1px solid black;
+        border-right:1px solid black;
+        cursor:default;
+}
+th
+{
+        height:20px;
+        font-size:12px;
+        font-weight:normal;
+        border-bottom:2px solid black;
+        border-right:1px solid black;
+        background-color:#999999
+}
+table
+{
+        borde:1px solid black;
+        font-size:13px;
+}
+input
+{
+        border:1px solid black;
+}
+a{
+	font-size:12px;
+}
+</style>
+</style>
 	</head>
-	<body>
+	<body>  
+		<a>大家最喜欢吃的菜排名</a>
+		<a>充值排名</a> 
+		<a>花费最大方排名</a><br>
 		<table>
 			<tr>
 				<td>
@@ -217,11 +283,15 @@
 					</table>
 				</td>
 			</tr>
+			<tr><td colspan="3"><hr></td></tr>
 			<tr>
 				<td>
 					<table style="border:1px">
+						<%//按照订餐人数的次数优先级显示出来全部的人员.
+						Set<Tuple> peopleSet = tool.getListWithScore(RedisColumn.orderPeopleWithScore());
+						 %>
 						<tr>
-							<td>
+							<td colspan="<%=peopleSet.size()+1%>">
 								查看订餐历史
 							</td>
 						</tr>
@@ -230,8 +300,6 @@
 								时间
 							</td>
 							<%	
-								//按照订餐人数的次数优先级显示出来全部的人员.
-								Set<Tuple> peopleSet = tool.getListWithScore(RedisColumn.orderPeopleWithScore());
 									Iterator<Tuple> itt = peopleSet.iterator(); 
 									while(itt.hasNext()){
 										Tuple tt = itt.next();
@@ -265,12 +333,14 @@
 										%>
 								<%=tool.getKey(RedisColumn.orderDinner(Integer.parseInt(_o)))+"("
 												+tool.getKey(RedisColumn.orderMoney(Integer.parseInt(_o)))+")"%>
+								 <img src="<%=basePath%>/jsp/onError.gif" onclick="javascript:deleteThisOrder('<%=_o%>')"/>
 								<%}%>
+								
 							</td>
 							<%
 									}
 								%>
-
+							
 						</tr>
 						<%}%>
 					</table>
@@ -302,7 +372,7 @@
 							<td><%=tool.getKey(RedisColumn.peopleName(o.getPeopleSno()))%>
 							</td>
 							<td><%=o.getDinner()%></td>
-							<td><%=o.getMoney()%></td>
+							<td><%=o.getMoney()%> <img src="<%=basePath%>/jsp/onError.gif" onclick="javascript:deleteThisDinner('<%=o.getSno()%>')"/></td>
 						</tr>
 						<%}%>
 					</table>
@@ -330,7 +400,7 @@
 							<td><%=o.getTime()%></td>
 							<td><%=tool.getKey(RedisColumn.peopleName(o.getPeopleSno()))%>
 							</td>
-							<td><%=o.getMoney()%></td>
+							<td><%=o.getMoney()%><img src="<%=basePath%>/jsp/onError.gif" onclick="javascript:deleteThisRecharge('<%=o.getSno()%>')"/></td>
 						</tr>
 						<%}%>
 					</table>
