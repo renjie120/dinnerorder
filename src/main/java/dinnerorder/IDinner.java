@@ -3,6 +3,7 @@ package dinnerorder;
 import java.util.List;
 
 import bean.Dinner;
+import bean.Login;
 import bean.Menu;
 import bean.Order;
 import bean.People;
@@ -27,6 +28,8 @@ public interface IDinner {
 	 * @return
 	 */
 	public List<Menu> getMenus();
+
+	public List<Login> getLogins();
 
 	/**
 	 * 返回菜单详情.
@@ -103,6 +106,21 @@ public interface IDinner {
 	public void deleteOrder(String id);
 	
 	/**
+	 * 登录并注册.
+	 * 如果返回-1就验证失败，否则就是返回的用户id.
+	 * @param param
+	 */
+	public int login(Login param);
+	
+ 
+	/**
+	 * 注册.
+	 * @param param
+	 * @return
+	 */
+	public int  regiest(Login param);
+	
+	/**
 	 * 删除人员信息.
 	 * @param order
 	 */
@@ -145,6 +163,8 @@ public interface IDinner {
 	public People getPeopleById(int tim);
 	
 	public Menu getMenuById(int tim);
+	
+	public Login getLoginById(int tim);
 	
 	public ReCharge getReChargeById(int tim);
 }

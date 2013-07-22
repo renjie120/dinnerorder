@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts2.ServletActionContext;
 
 import bean.Dinner;
+import bean.Login;
 import bean.Menu;
 import bean.Order;
 import bean.People;
@@ -195,6 +196,7 @@ public class DinnerAction {
 
 	/**
 	 * 保存菜单.
+	 * 
 	 * @return
 	 */
 	public String saveMenu() {
@@ -214,23 +216,27 @@ public class DinnerAction {
 
 	/**
 	 * 根据充值金额排序的人员清单.
+	 * 
 	 * @return
 	 */
 	public String peopleByRechargeMoneyRank() {
 		List<People> p = dinner.getPeopleByRechargesRank();
 		HttpServletRequest request = ServletActionContext.getRequest();
 		request.setAttribute("rankPeople", p);
+		request.setAttribute("title", "充值金额统计排行榜");
 		return "newTable";
 	}
-	
+
 	/**
 	 * 根据菜名的订单数的清单.
+	 * 
 	 * @return
 	 */
 	public String dinnerRank() {
 		List<Dinner> p = dinner.getDinnersByRank();
 		HttpServletRequest request = ServletActionContext.getRequest();
 		request.setAttribute("rankDinner", p);
+		request.setAttribute("title", "大家最喜欢订餐排行榜");
 		return "newTable";
 	}
 
@@ -272,6 +278,7 @@ public class DinnerAction {
 
 	/**
 	 * 删除订单.
+	 * 
 	 * @return
 	 */
 	public String deleteOrder() {
@@ -286,8 +293,72 @@ public class DinnerAction {
 		return null;
 	}
 
+	private String groupNameList;
+
+	public String getGroupNameList() {
+		return groupNameList;
+	}
+
+	public void setGroupNameList(String groupNameList) {
+		this.groupNameList = groupNameList;
+	}
+
+	private String groupName;
+	private String pass;
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
+	public String getPass() {
+		return pass;
+	}
+
+	public void setPass(String pass) {
+		this.pass = pass;
+	}
+
+	public String login() {
+		Login l = new Login();
+		l.setGroupName(groupName);
+		l.setSno(Integer.parseInt(groupNameList));
+		l.setPass(pass);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		HttpServletRequest request = ServletActionContext.getRequest();
+		int userId = dinner.login(l);
+		if (userId>0) {
+			Login lll = dinner.getLoginById( userId); 
+			request.getSession().setAttribute("groupName", lll.getGroupName());
+			request.getSession().setAttribute("userNo", lll.getSno());
+			request.getSession().setAttribute("groupSno", lll.getSno());
+			try {
+				response.setContentType("text/html;charset=GBK");
+				response.getWriter().write("欢迎进入"+lll.getGroupName()+"订餐界面!");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				Login lll = dinner.getLoginById(Integer.parseInt(groupNameList));
+				request.getSession().setAttribute("userNo", "-1");
+				request.getSession().setAttribute("groupSno", lll.getSno());
+				request.getSession().setAttribute("groupName", lll.getGroupName());
+				response.setContentType("text/html;charset=GBK");
+				response.getWriter().write("验证失败，将以游客身份登录"+lll.getGroupName()+"订餐界面!");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * 删除充值记录.
+	 * 
 	 * @return
 	 */
 	public String deleteRecharge() {

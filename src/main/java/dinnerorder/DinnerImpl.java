@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.SessionCallback;
 import redis.BaseRedisTool;
 import redis.RedisColumn;
 import bean.Dinner;
+import bean.Login;
 import bean.Menu;
 import bean.Order;
 import bean.People;
@@ -117,14 +118,15 @@ public class DinnerImpl implements IDinner {
 	public int saveRecharge(ReCharge recharge) {
 		final int val = tool.generateKey(RedisColumn.snoFactory());
 		final ReCharge p = recharge;
-		byte[] m = tool.getHashByKey(RedisColumn.peopleToRechargeMoney(), (recharge.getPeopleSno()+"").getBytes());
-		final byte[] sum ;
-		if(m==null)
+		byte[] m = tool.getHashByKey(RedisColumn.peopleToRechargeMoney(),
+				(recharge.getPeopleSno() + "").getBytes());
+		final byte[] sum;
+		if (m == null)
 			sum = recharge.getMoney().getBytes();
-		else{
+		else {
 			double d = Double.parseDouble(new String(m));
-			d+=Double.parseDouble(recharge.getMoney());
-			sum = (d+"").getBytes();
+			d += Double.parseDouble(recharge.getMoney());
+			sum = (d + "").getBytes();
 		}
 		SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
 			@SuppressWarnings("unchecked")
@@ -145,10 +147,10 @@ public class DinnerImpl implements IDinner {
 						// 添加人员到充值记录的映射
 						connection.sAdd(
 								RedisColumn.peopleToRecharge(p.getPeopleSno()),
-								(val + "").getBytes()); 
-						//设置当前人的缴纳的定金总额.
-						connection.hSet(RedisColumn.peopleToRechargeMoney(), (p.getPeopleSno()+"").getBytes(),
-								sum); 
+								(val + "").getBytes());
+						// 设置当前人的缴纳的定金总额.
+						connection.hSet(RedisColumn.peopleToRechargeMoney(),
+								(p.getPeopleSno() + "").getBytes(), sum);
 						connection.sAdd(
 								RedisColumn.timeToRecharge(p.getTime()),
 								(val + "").getBytes());
@@ -477,18 +479,18 @@ public class DinnerImpl implements IDinner {
 	@Override
 	public List<People> getPeopleByRechargesRank() {
 		List<People> result = new ArrayList<People>();
-		Map<byte[],byte[]> s = tool
-				.getMapAll(RedisColumn.peopleToRechargeMoney());
-		Iterator<Map.Entry<byte[],byte[]>> it = s.entrySet().iterator();
+		Map<byte[], byte[]> s = tool.getMapAll(RedisColumn
+				.peopleToRechargeMoney());
+		Iterator<Map.Entry<byte[], byte[]>> it = s.entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry<byte[],byte[]> m = it.next();
-			int pId = Integer.parseInt(new String(m.getKey())); 
-			People p =getPeopleById(pId); 
-			p.setRechargeSum(Double.parseDouble(new String( m.getValue()))); 
+			Map.Entry<byte[], byte[]> m = it.next();
+			int pId = Integer.parseInt(new String(m.getKey()));
+			People p = getPeopleById(pId);
+			p.setRechargeSum(Double.parseDouble(new String(m.getValue())));
 			result.add(p);
 		}
 		Collections.sort(result);
-		return result; 
+		return result;
 	}
 
 	@Override
@@ -497,7 +499,7 @@ public class DinnerImpl implements IDinner {
 		double sum = 0;
 		for (Object o : s) {
 			int key = Integer.parseInt(new String((byte[]) o));
-			sum+= Double.parseDouble(tool.getKey(RedisColumn.orderMoney(key)) ); 
+			sum += Double.parseDouble(tool.getKey(RedisColumn.orderMoney(key)));
 		}
 		return sum;
 	}
@@ -551,6 +553,71 @@ public class DinnerImpl implements IDinner {
 		p.setSno(key);
 		p.setTime(tool.getKey(RedisColumn.rechargeTime(key)));
 		return p;
+	}
+
+	@Override
+	public int login(Login param) {
+		if (param.getSno() == -1) {
+			return regiest(param);
+		}else{
+			int userId = param.getSno();
+			if(param.getPass().equals(tool.getKey(RedisColumn.loginPass(userId)))){
+				return param.getSno();
+			}else{
+				return -1;
+			}
+		} 
+	}
+
+	@Override
+	public int regiest(Login param) {
+		final int val = tool.generateKey(RedisColumn.snoFactory());
+		final Login p = param;
+		SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public Integer execute(RedisOperations operations)
+					throws DataAccessException {
+				operations.multi();
+				operations.execute(new RedisCallback() {
+					@Override
+					public Object doInRedis(RedisConnection connection)
+							throws DataAccessException {
+						connection.set(RedisColumn.loginGroupName(val), p
+								.getGroupName().getBytes());
+						connection.set(RedisColumn.loginPass(val), p.getPass()
+								.getBytes());
+						connection.sAdd(RedisColumn.login(),
+								(val + "").getBytes());
+						return null;
+					}
+
+				});
+				operations.exec();
+				return null;
+			}
+		};
+		tool.getTemplate().execute(sessionCallback);
+		return val;
+	}
+
+	@Override
+	public Login getLoginById(int tim) {
+		Login p = new Login();
+		p.setGroupName(tool.getKey(RedisColumn.loginGroupName(tim))) ;
+		p.setSno(tim); 
+		return p;
+	}
+
+	@Override
+	public List<Login> getLogins() {
+		Set<byte[]> ll = tool.getSet(RedisColumn.login());
+		List<Login> result = new ArrayList<Login>();
+		for (Object o : ll) {
+			int key = Integer.parseInt(new String((byte[]) o)); 
+			result.add(getLoginById(key));
+		}
+		return result;
 	}
 
 }

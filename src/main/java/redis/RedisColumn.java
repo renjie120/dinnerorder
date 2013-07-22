@@ -7,8 +7,7 @@ package redis;
  * 
  */
 public class RedisColumn {
-	public final static String SPLIT = ":";
-	public final static String SYSTEM = "dinnerorder:";
+	public final static String SYSTEM = "dinnerorder";
 	public final static String SNO_FACTORY = "diner_sno";
 	public final static String ORDER_PRE = "order";
 	public final static String ORDER_TIME = "timer";
@@ -27,22 +26,40 @@ public class RedisColumn {
 	public final static String ORDER_TIME_SET = "order_times_set";
 	public final static String ORDER_SUM_MONEY = "sumMoney";
 
+	private static class Key{
+		private String k;
+		private final static String SPLIT = ":";
+
+		public Key(String k){
+			this.k = k;
+		}
+		public Key add(String s){
+			this.k+=SPLIT+s;
+			return this;
+		}
+		public Key add(int s){
+			this.k+=SPLIT+s;
+			return this;
+		}
+		public byte[] getId(){
+			return this.k.getBytes();
+		}
+	} 
+	
 	public static byte[] order() {
-		return (SYSTEM + ORDER_PRE).getBytes();
+		return new Key(SYSTEM).add(ORDER_PRE).getId();
 	}
 
 	public static byte[] snoFactory() {
-		return (SYSTEM + SNO_FACTORY).getBytes();
+		return new Key(SYSTEM).add(SNO_FACTORY).getId();
 	}
 
-	public static byte[] peopleAndTimeToOrder(int people, String time) {
-		return (SYSTEM + ORDER_PRE + SPLIT + people + SPLIT + time + SPLIT + PEOPLE_AND_TIME_TO_ORDER)
-				.getBytes();
+	public static byte[] peopleAndTimeToOrder(int people, String time) { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(people).add(time).add(PEOPLE_AND_TIME_TO_ORDER).getId();
 	}
 
-	public static byte[] orderTime(int sno) {
-		return (SYSTEM + ORDER_PRE + SPLIT + sno + SPLIT + ORDER_TIME)
-				.getBytes();
+	public static byte[] orderTime(int sno) { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(sno).add(ORDER_TIME).getId();
 	}
 
 	/**
@@ -51,9 +68,8 @@ public class RedisColumn {
 	 * @param peolple
 	 * @return
 	 */
-	public static byte[] orderPeopleWithScore() {
-		return (SYSTEM + ORDER_PRE + SPLIT + ORDER_PEOPLE_WITH_SCORE)
-				.getBytes();
+	public static byte[] orderPeopleWithScore() { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(ORDER_PEOPLE_WITH_SCORE).getId();
 	}
 
 	/**
@@ -61,9 +77,8 @@ public class RedisColumn {
 	 * 
 	 * @return
 	 */
-	public static byte[] orderDinnerWithScore() {
-		return (SYSTEM + ORDER_PRE + SPLIT + ORDER_DINNER_WITH_SCORE)
-				.getBytes();
+	public static byte[] orderDinnerWithScore() { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(ORDER_DINNER_WITH_SCORE).getId();
 	}
 
 	/**
@@ -72,9 +87,8 @@ public class RedisColumn {
 	 * @param people
 	 * @return
 	 */
-	public static byte[] peopleToOrder(int people) {
-		return (SYSTEM + ORDER_PRE + SPLIT + people + SPLIT + PEOPLE_TO_ORDER)
-				.getBytes();
+	public static byte[] peopleToOrder(int people) { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(people).add(ORDER_DINNER_WITH_SCORE).getId();
 	}
 
 	/**
@@ -83,9 +97,8 @@ public class RedisColumn {
 	 * @param time
 	 * @return
 	 */
-	public static byte[] timeToOrder(String time) {
-		return (SYSTEM + ORDER_PRE + SPLIT + time + SPLIT + TIME_TO_ORDER)
-				.getBytes();
+	public static byte[] timeToOrder(String time) { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(time).add(TIME_TO_ORDER).getId();
 	}
 
 	/**
@@ -94,34 +107,46 @@ public class RedisColumn {
 	 * @param time
 	 * @return
 	 */
-	public static byte[] orderTimeSet() {
-		return (SYSTEM + ORDER_PRE + SPLIT + ORDER_TIME_SET).getBytes();
+	public static byte[] orderTimeSet() { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(ORDER_TIME_SET).getId();
 	}
 
-	public static byte[] orderMoney(int sno) {
-		return (SYSTEM + ORDER_PRE + SPLIT + sno + SPLIT + ORDER_MONEY)
-				.getBytes();
+	public static byte[] orderMoney(int sno) { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(sno).add(ORDER_MONEY).getId();
 	}
 
-	public static byte[] orderPeople(int sno) {
-		return (SYSTEM + ORDER_PRE + SPLIT + sno + SPLIT + ORDER_PEOPLE)
-				.getBytes();
+	public static byte[] orderPeople(int sno) { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(sno).add(ORDER_PEOPLE).getId();
 	}
 
-	public static byte[] orderSingle(int sno) {
-		return (SYSTEM + ORDER_PRE + SPLIT + sno + SPLIT + ORDER_SINGLE)
-				.getBytes();
+	public static byte[] orderSingle(int sno) { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(sno).add(ORDER_SINGLE).getId();
 	}
 
-	public static byte[] orderDinner(int sno) {
-		return (SYSTEM + ORDER_PRE + SPLIT + sno + SPLIT + ORDER_DINNER)
-				.getBytes();
+	public static byte[] orderDinner(int sno) { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(sno).add(ORDER_DINNER).getId();
 	}
 
-	public static byte[] orderList() {
-		return (SYSTEM + ORDER_PRE + SPLIT + ORDER_LIST).getBytes();
+	public static byte[] orderList() { 
+		return new Key(SYSTEM).add(ORDER_PRE).add(ORDER_LIST).getId();
 	}
 
+	public final static String LOGIN_PRE = "login";
+	public final static String LOGIN_GROUP = "group";
+	public final static String LOGIN_PASS = "pass";  
+	public static byte[] login() { 
+		return new Key(SYSTEM).add(LOGIN_PRE).getId();
+	}
+	 
+
+	public static byte[] loginGroupName(int sno) { 
+		return new Key(SYSTEM).add(LOGIN_PRE).add(sno).add(LOGIN_GROUP).getId();
+	}
+
+	public static byte[] loginPass(int sno) { 
+		return new Key(SYSTEM).add(LOGIN_PRE).add(sno).add(LOGIN_PASS).getId();
+	}
+	
 	public final static String MENU_PRE = "menu";
 	public final static String MENU_NAME = "name";
 	public final static String MENU_URL = "url";
@@ -129,26 +154,24 @@ public class RedisColumn {
 	public final static String MENU_SET = "menus";
 	public final static String MENU_CLICK = "menuclick";
 
-	public static byte[] menu() {
-		return (SYSTEM + SPLIT + MENU_PRE).getBytes();
+	public static byte[] menu() { 
+		return new Key(SYSTEM).add(MENU_PRE).getId();
 	}
 
-	public static byte[] menuName(int sno) {
-		return (SYSTEM + SPLIT + MENU_PRE + SPLIT + sno + SPLIT + MENU_NAME)
-				.getBytes();
+	public static byte[] menuName(int sno) { 
+		return new Key(SYSTEM).add(MENU_PRE).add(sno).add(MENU_NAME).getId();
 	}
 
-	public static byte[] menuScore() {
-		return (SYSTEM + SPLIT + MENU_PRE + SPLIT + MENU_CLICK).getBytes();
+	public static byte[] menuScore() { 
+		return new Key(SYSTEM).add(MENU_PRE).add(MENU_CLICK).getId();
 	}
 
-	public static byte[] menuUrl(int sno) {
-		return (SYSTEM + SPLIT + MENU_PRE + SPLIT + sno + SPLIT + MENU_URL)
-				.getBytes();
+	public static byte[] menuUrl(int sno) { 
+		return new Key(SYSTEM).add(MENU_PRE).add(sno).add(MENU_URL).getId();
 	}
 
-	public static byte[] menuList() {
-		return (SYSTEM + SPLIT + MENU_PRE + SPLIT + MENU_SET).getBytes();
+	public static byte[] menuList() { 
+		return new Key(SYSTEM).add(MENU_PRE).add(MENU_SET).getId();
 	}
 
 	public final static String DINNER_PRE = "dinner";
@@ -156,17 +179,16 @@ public class RedisColumn {
 	public final static String DINNER_SNO = "sno";
 	public final static String DINNER_LIST = "dinners";
 
-	public static byte[] dinner() {
-		return (SYSTEM + SPLIT + DINNER_PRE).getBytes();
+	public static byte[] dinner() { 
+		return new Key(SYSTEM).add(DINNER_PRE).getId();
 	}
 
-	public static byte[] dinnerName(int sno) {
-		return (SYSTEM + SPLIT + DINNER_PRE + SPLIT + sno + SPLIT + DINNER_NAME)
-				.getBytes();
+	public static byte[] dinnerName(int sno) { 
+		return new Key(SYSTEM).add(DINNER_PRE).add(sno).add(DINNER_NAME).getId();
 	}
 
-	public static byte[] dinnerList() {
-		return (SYSTEM + SPLIT + DINNER_PRE + SPLIT + DINNER_LIST).getBytes();
+	public static byte[] dinnerList() { 
+		return new Key(SYSTEM).add(DINNER_PRE).add(DINNER_LIST).getId();
 	}
 
 	public final static String PEOPLE_PRE = "people";
@@ -174,17 +196,16 @@ public class RedisColumn {
 	public final static String PEOPLE_SNO = "sno";
 	public final static String PEOPLE_LIST = "peoples";
 
-	public static byte[] people() {
-		return (SYSTEM + PEOPLE_PRE).getBytes();
+	public static byte[] people() { 
+		return new Key(SYSTEM).add(PEOPLE_PRE).getId();
 	}
 
-	public static byte[] peopleName(int sno) {
-		return (SYSTEM + PEOPLE_PRE + SPLIT + sno + SPLIT + PEOPLE_NAME)
-				.getBytes();
+	public static byte[] peopleName(int sno) { 
+		return new Key(SYSTEM).add(PEOPLE_PRE).add(sno).add(PEOPLE_NAME).getId();
 	}
 
-	public static byte[] peopleList() {
-		return (SYSTEM + PEOPLE_PRE + SPLIT + PEOPLE_LIST).getBytes();
+	public static byte[] peopleList() { 
+		return new Key(SYSTEM).add(PEOPLE_PRE).add(PEOPLE_LIST).getId();
 	}
 
 	public final static String RECHARGE_SNO = "sno";
@@ -203,9 +224,8 @@ public class RedisColumn {
 	 * @param people
 	 * @return
 	 */
-	public static byte[] peopleToRecharge(int people) {
-		return (SYSTEM + RECHARGE_PRE + SPLIT + people + SPLIT + PEOPLE_TO_RECHARGE)
-				.getBytes();
+	public static byte[] peopleToRecharge(int people) { 
+		return new Key(SYSTEM).add(RECHARGE_PRE).add(people).add(PEOPLE_TO_RECHARGE).getId();
 	}
 
 	/**
@@ -214,9 +234,8 @@ public class RedisColumn {
 	 * @param people
 	 * @return
 	 */
-	public static byte[] peopleToRechargeMoney() {
-		return (SYSTEM  + SPLIT + RECHARGE_PRE + SPLIT + PEOPLE_TO_RECHARGE_MONEY)
-				.getBytes();
+	public static byte[] peopleToRechargeMoney() { 
+		return new Key(SYSTEM).add(RECHARGE_PRE).add(PEOPLE_TO_RECHARGE_MONEY).getId();
 	}
 
 	/**
@@ -225,32 +244,28 @@ public class RedisColumn {
 	 * @param time
 	 * @return
 	 */
-	public static byte[] timeToRecharge(String time) {
-		return (SYSTEM + RECHARGE_PRE + SPLIT + time + SPLIT + TIME_TO_RECHARGE)
-				.getBytes();
+	public static byte[] timeToRecharge(String time) { 
+		return new Key(SYSTEM).add(RECHARGE_PRE).add(time).add(TIME_TO_RECHARGE).getId();
 	}
 
-	public static byte[] recharge() {
-		return (SYSTEM + RECHARGE_PRE).getBytes();
+	public static byte[] recharge() { 
+		return new Key(SYSTEM).add(RECHARGE_PRE).getId();
 	}
 
-	public static byte[] rechargePeople(int sno) {
-		return (SYSTEM + RECHARGE_PRE + SPLIT + sno + SPLIT + RECHARGE_PEOPLE)
-				.getBytes();
+	public static byte[] rechargePeople(int sno) { 
+		return new Key(SYSTEM).add(RECHARGE_PRE).add(sno).add(RECHARGE_PEOPLE).getId();
 	}
 
-	public static byte[] rechargeTime(int sno) {
-		return (SYSTEM + RECHARGE_PRE + SPLIT + sno + SPLIT + RECHARGE_TIME)
-				.getBytes();
+	public static byte[] rechargeTime(int sno) { 
+		return new Key(SYSTEM).add(RECHARGE_PRE).add(sno).add(RECHARGE_TIME).getId();
 	}
 
-	public static byte[] rechargeList() {
-		return (SYSTEM + PEOPLE_PRE + SPLIT + RECHARGE_LIST).getBytes();
+	public static byte[] rechargeList() { 
+		return new Key(SYSTEM).add(RECHARGE_PRE).add(RECHARGE_LIST).getId();
 	}
 
-	public static byte[] rechargeMoney(int sno) {
-		return (SYSTEM + RECHARGE_PRE + SPLIT + sno + SPLIT + RECHARGE_MONEY)
-				.getBytes();
+	public static byte[] rechargeMoney(int sno) { 
+		return new Key(SYSTEM).add(RECHARGE_PRE).add(sno).add(RECHARGE_MONEY).getId();
 	}
 
 }

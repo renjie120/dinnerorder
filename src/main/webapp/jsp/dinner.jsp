@@ -13,7 +13,10 @@
 	BaseRedisTool tool = (BaseRedisTool) SpringContextUtil
 			.getBean("redisTool");
 	String path = request.getContextPath();
-	String basePath = request.getScheme() + "://"
+	String groupName =""+session.getAttribute("groupName");
+	String groupSno =""+session.getAttribute("groupSno");
+	String userId =""+session.getAttribute("userNo");
+	 String basePath = request.getScheme() + "://"
 			+ request.getServerName() + ":" + request.getServerPort()
 			+ path + "/";
 	IDinner dinner = (IDinner) SpringContextUtil.getBean("dinnerImpl");
@@ -38,10 +41,11 @@
 <LINK rel=stylesheet type=text/css href="<%=basePath%>/css/reset.css">
 <LINK rel=stylesheet type=text/css href="<%=basePath%>/css/style.css">
 <script type="text/javascript">
-	$(function() {
-		var d = new Date();
-		$('#moneyTime').val(d.asString('yyyy-mm-dd'));
-	});
+	 function initload() {  
+		<%if(userId==null||"-1".equals(userId+"")){ %>
+			$('img').remove();
+		<%}%>
+	}
 
 	/**充值.
 	 */
@@ -56,6 +60,10 @@
 		p.push("rechargeMoneyTime=" + $('#rechargeMoneyTime').val());
 		p.push("rechargePeopleList=" + $('#rechargePeopleList').val());
 		p.push("rechargeMoney=" + $('#rechargeMoney').val());
+		if (isNaN($('#rechargeMoney').val() ) ){
+			alert("请输入有效金额!");
+			return false;
+		}
 		var param = p.join('&');
 		$.ajax({
 			url : "dinner!saveRecharge.action",
@@ -76,6 +84,17 @@
 			}
 		});
 	}
+	
+	function findVByName(dName){
+		var result = -1;
+		$('#dinnerNameList option').each(function(){ 
+			if($(this).html()==dName){
+				result = $(this).val();
+				return ;
+			}
+		});
+		return result;
+	}
 	//下订单.
 	function saveOrder() {
 		var p = [];
@@ -87,9 +106,21 @@
 			alert("必须填写人名或者选择人名!");
 			return false;
 		}
-		if ($('#dinnerName').val() == '' && $('#dinnerNameList').val() == '-1') {
+		if (isNaN($('#money').val() ) ){
+			alert("请输入有效金额!");
+			return false;
+		}
+		var dName = $('#dinnerName').val();
+		if ( dName== '' && $('#dinnerNameList').val() == '-1') {
 			alert("必须填写菜名或者选择菜名!");
 			return false;
+		}
+		if(dName != ''){ 
+			var _v = findVByName(dName); 
+			if(_v!=-1){
+			 	$('#dinnerNameList').val(_v);
+			 	$('#dinnerName').val('');
+			}
 		}
 		p.push("moneyTime=" + $('#moneyTime').val());
 		p.push("peopleName=" + $('#peopleName').val());
@@ -256,7 +287,9 @@ a {
 </style>
 </style>
 </head>
-<body>
+<body style="overflow: auto;" onload="initload()">
+	当前分组：<%=groupName%>
+	<input id="groupSno" type="hidden" value="<%=groupSno%>">
 	<table>
 		<tr>
 			<td>
@@ -264,10 +297,10 @@ a {
 					<tr>
 						<td>
 							<table>
-								<td colspan="2">订餐操作</td>
+								<th colspan="2">订餐</th>
 								<tr>
 									<td>时间</td>
-									<td><input id="moneyTime" type="text" readOnly='true'>
+									<td><input id="moneyTime" type="text" readOnly='true' value="2013-7-1">
 										<img onclick="WdatePicker({el:$dp.$('moneyTime')})"
 										src="<%=basePath%>/js/common/datepicker/images/calendar.gif">
 									</td>
@@ -287,7 +320,7 @@ a {
 								</tr>
 								<tr>
 									<td>菜名</td>
-									<td><input id='dinnerName' /> <select id='dinnerNameList'>
+									<td><input id='dinnerName'  /> <select id='dinnerNameList' >
 											<option value="-1">请选择</option>
 											<%
 												for (Dinner p : dinners) {
@@ -300,7 +333,7 @@ a {
 								</tr>
 								<tr>
 									<td>金额</td>
-									<td><input id='money' /></td>
+									<td><input id='money'  /></td>
 								</tr>
 								<tr>
 									<td>是否单点</td>
@@ -319,7 +352,7 @@ a {
 						<td>
 							<table>
 								<tr>
-									<td colspan="2">充值操作</td>
+									<th colspan="2">充值</th>
 								</tr>
 								<tr>
 									<td>时间</td>
@@ -356,7 +389,7 @@ a {
 						<td>
 							<table>
 								<tr>
-									<td colspan="2">添加菜单</td>
+									<th colspan="2">添加菜单</th>
 								</tr>
 								<tr>
 									<td>菜单名</td>
@@ -374,7 +407,7 @@ a {
 						<td>
 							<table>
 								<tr>
-									<td colspan="2">趣味排行榜</td>
+									<th colspan="2">趣味排行榜</th>
 								</tr>
 								<tr>
 									<td>排行榜</td>
@@ -408,7 +441,7 @@ a {
 								.orderPeopleWithScore());
 					%>
 					<tr>
-						<td colspan="<%=peopleSet.size() + 1%>">查看订餐历史</td>
+						<th colspan="<%=peopleSet.size() + 1%>">查看订餐历史</th>
 					</tr>
 					<tr>
 						<td>时间</td>
@@ -436,7 +469,7 @@ a {
 							}
 					%>
 					<tr>
-						<td><%=t%></td>
+						<td><%=t+"("+dinner.getSumByDay(t)+")"%></td>
 						<%
 							//按照订餐人数的次数优先级显示出来全部的人员.
 								Iterator<Tuple> it2 = peopleSet.iterator();
@@ -475,7 +508,7 @@ a {
 			<td style="valign:top">
 				<table>
 					<tr>
-						<td colspan="5">查看订单历史</td>
+						<th colspan="5">查看订单历史</th>
 					</tr>
 					<tr>
 						<td>时间</td>
@@ -504,7 +537,7 @@ a {
 			<td style="valign:top">
 				<table>
 					<tr>
-						<td colspan="4">查看充值历史</td>
+						<th colspan="4">查看充值历史</th>
 					</tr>
 					<tr>
 						<td>时间</td>

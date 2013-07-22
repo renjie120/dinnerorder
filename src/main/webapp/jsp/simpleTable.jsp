@@ -15,6 +15,7 @@
 			+ request.getServerName() + ":" + request.getServerPort()
 			+ path + "/";
 	List<People> ps = (List<People>) request.getAttribute("rankPeople");
+	String title = (String) request.getAttribute("title");
 	List<Dinner> dinners = (List<Dinner>) request
 			.getAttribute("rankDinner");
 %>
@@ -41,7 +42,7 @@ td {
 
 th {
 	height: 20px;
-	font-size: 12px;
+	font-size: 15px;
 	font-weight: normal;
 	border-bottom: 2px solid black;
 	border-right: 1px solid black;
@@ -49,7 +50,7 @@ th {
 }
 
 table {
-	font-size: 13px;
+	font-size: 14px;
 	border-color: #ff6600;
 	bg-color: #FFD2D2;
 	cell-spacing: 0;
@@ -61,16 +62,15 @@ table {
 input {
 	border: 1px solid black;
 }
-
-a {
-	font-size: 12px;
-}
+ 
 </style>
 </style>
 </head>
 <body>
 	<table>
+		<tr><th colspan="2"><h3><%=title%></h3></th></tr>
 		<%
+		if(ps!=null&&ps.size()>0)
 			for (People p : ps) {
 		%>
 		<tr>
@@ -81,6 +81,7 @@ a {
 			}
 		%>
 		<%
+		if(dinners!=null&&dinners.size()>0)
 			for (Dinner p : dinners) {
 		%>
 		<tr>
@@ -90,7 +91,7 @@ a {
 		<%
 			}
 		%>
-		<tr></tr>
+		<tr><td colspan="2" style="align:center"><button onclick="window.close();">关闭</button></td></tr>
 	</table>
 </body>
 </html>
