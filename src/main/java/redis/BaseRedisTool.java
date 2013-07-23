@@ -21,7 +21,9 @@ import org.springframework.data.redis.core.SessionCallback;
  * 
  * @author lisq
  * 
- */
+ */ 
+
+@SuppressWarnings("unchecked")
 public class BaseRedisTool {
 	private RedisTemplate<Serializable, Serializable> template;
 
@@ -372,8 +374,7 @@ public class BaseRedisTool {
 			return;
 		final Set<byte[]> allKeys = allKeys(key.getBytes());
 		@SuppressWarnings("rawtypes")
-		SessionCallback sessionCallback = new SessionCallback() {
-			@SuppressWarnings("unchecked")
+		SessionCallback sessionCallback = new SessionCallback() { 
 			@Override
 			public Object execute(RedisOperations operations)
 					throws DataAccessException {
@@ -399,8 +400,7 @@ public class BaseRedisTool {
 		};
 		template.execute(sessionCallback);
 	}
-
-	@SuppressWarnings("unchecked")
+ 
 	public void deleteKey(String key) {
 		if (key == null)
 			return; 
@@ -438,6 +438,23 @@ public class BaseRedisTool {
 
 		});
 	}
+	public void rename(String key,String value) {
+		if (key == null||value==null)
+			return; 
+		final String keykey = key;
+		final String va = value;
+
+		template.execute(new RedisCallback() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				connection.rename(keykey.getBytes(),va.getBytes());
+				return null;
+			}
+
+		});
+	}
+	
 	
 	/**
 	 * 删除set里面的值.

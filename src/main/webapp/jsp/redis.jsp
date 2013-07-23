@@ -55,7 +55,7 @@
 								success : function(d) {
 									 eval("var data="+d);
 									if(data.type=='string'){
-										$('#existsTable').prepend('<tr  class="title"><td  >'+$('[name=exists]').val()+'</td><td ><img src="<%=basePath%>/jsp/onError.gif" onclick="deletethis(this)"/></td></tr><tr><td>字符串</td><td>'+data.value+'</td></tr>');
+										$('#existsTable').prepend('<tr  class="title"><td  >'+$('[name=exists]').val()+'</td><td ><img src="<%=basePath%>/jsp/onError.gif" onclick="deletethis(this)"/></td><td>重命名:<input rename id="'+_v+'" /><img src="<%=basePath%>/jsp/onError.gif" onclick="rename(this)"/></td></tr><tr><td>字符串</td><td>'+data.value+'</td></tr>');
 									}else if(data.type=='hash'){ 
 										 var buf = [];
 										 var _v = $('[name=exists]').val();
@@ -63,7 +63,7 @@
 										 for(var ii in data.value){
 											 	buf.push("<tr><td>"+data.value[ii].key+"</td><td>"+data.value[ii].value+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' lv='"+_v+"' onclick='removeHash(this)'/></td></tr>");  
 										 }
-										 $('#existsTable').prepend("<tr  class='title'><td  >"+$('[name=exists]').val()+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr  class='title'><td  >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td><td>重命名:<input rename id='"+_v+"' /><img src='<%=basePath%>/jsp/onError.gif' onclick='rename(this)'/></td></tr>"+buf.join(''));
 									}else if(data.type=='list'){ 
 										 var buf = [];
 										 var _v = $('[name=exists]').val();
@@ -71,7 +71,7 @@
 										 for(var ii in data.value){
 											 	buf.push("<tr><td >"+data.value[ii]+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' lv='"+_v+"' onclick='removeList(this)'/></td></tr>");   
 										 }
-										 $('#existsTable').prepend("<tr class='title'><td >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr class='title'><td >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td><td>重命名:<input rename id='"+_v+"' /><img src='<%=basePath%>/jsp/onError.gif' onclick='rename(this)'/></td></tr>"+buf.join(''));
 									}else if(data.type=='set'){ 
 										 var buf = [];
 										 var _v = $('[name=exists]').val();
@@ -79,7 +79,7 @@
 										 for(var ii in data.value){
 											 	buf.push("<tr><td >"+data.value[ii]+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' lv='"+_v+"' onclick='removeSet(this)'/></td></tr>");   
 										 }
-										 $('#existsTable').prepend("<tr  class='title'><td >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr  class='title'><td >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td><td>重命名:<input rename id='"+_v+"' /><img src='<%=basePath%>/jsp/onError.gif' onclick='rename(this)'/></td></tr>"+buf.join(''));
 									}else if(data.type=='zset'){ 
 										 var buf = [];
 										 var _v = $('[name=exists]').val();
@@ -88,7 +88,7 @@
 											 	buf.push("<tr><td>"+data.value[ii].value+"</td><td>"+data.value[ii].score+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' lv='"+_v+"' onclick='removeZScore(this)'/></td></tr>");   
 										 }
 										 $('#existsTable').prepend("<tr  class='title'><td  >"+$('[name=exists]').val()
-												 +"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
+												 +"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td><td>重命名:<input rename id='"+_v+"' /><img src='<%=basePath%>/jsp/onError.gif' onclick='rename(this)'/></td></tr>"+buf.join(''));
 									}else{
 										 $('#existsTable').prepend("<tr  class='title'><td colspan='2'>"+$('[name=exists]').val()+"</td></tr>"+'<tr><td>没有查找到</td></tr>');
 									}
@@ -113,8 +113,39 @@
 										}
 									});
 						});
+		
+		$('#addKey').click(function() {
+			$.ajax({
+						url : "redisManager!keys.action",
+						data : "keys=" + $('[name=keys]').val(),
+						type : "post",
+						success : function(d) {
+							 eval("var data="+d);
+							 var i =0;
+							 var buf = [];
+							 buf.push("<tr class='title'><td >查找："+$('[name=keys]').val()+"结果如下:</td></tr>");
+							 for(var ii in data){ 
+									buf.push("<tr><td>"+data[ii]+"</td></tr>");   
+							 } 
+							 $('#keysTable').prepend(buf.join(''));
+						}
+					});
+		});
 	});
 	
+	function rename(obj){
+		var v = $(obj).parent().parent().find('td').eq(0).html();
+		var newV = $(obj).prev().val();
+		$.ajax({
+			url : "redisManager!rename.action",
+			data : "keys=" + v+"&value="+newV,
+			type : "post",
+			success : function(d) {
+				$(obj).parent().parent().find('td').eq(0).html(newV);
+				$(obj).prev().val("");
+			}
+		}); 
+	}
 	function deletethis(obj){
 		if(confirm('确定删除么?')){
 			var v = $(obj).parent().prev().html();
@@ -194,20 +225,28 @@
 	<hr>
 	<br>
 	<input name="config">
-	<button id="seeConfig">查看redis配置信息(例如：config*)</button>
+	<button id="seeConfig">查看配置</button>(例如：config*)
 	<br>
 	<table id='configTable'></table>
 	
 	<hr>
 	<input name="keys">
-	<button id="findKey">匹配key(例如:lsq*)</button>
+	<button id="findKey">匹配key</button>(例如:lsq*)
 	<br>
 	<table id='keysTable'></table>
 	
 	<hr>
 	<input name="exists">
-	<button id="exisKey">查询键值(对指定键值进行查询，删除，修改,重命名等操作)</button>
+	<button id="exisKey">查询键值</button>(对指定键值进行查询，删除，修改,重命名等操作)
 	<br>
 	<table id='existsTable'></table>
+	
+	<hr>
+	类型=<select id="keytype"><option value="str">字符串</option><option value="hash">哈希表</option><option value="hash">哈希表N</option><option value="list">列表</option><option value="set">集合</option><option value="zset">有序集合</option></select>
+	<br>key=<input id="newKeyName"/>
+	<br>val1=<input id="val1"/>
+	<br>val2=<input id="val2" style="display:none"/>
+	<button id="addKey">添加键值</button>(在原有基础上添加，无则新建,不会删除以前数据)<br>
+	<table id='addKeyTable'></table>
 </body>
 </html>

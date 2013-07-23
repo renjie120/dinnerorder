@@ -73,6 +73,11 @@ public class RedisManagerAction {
 		return null;
 	}
 	
+	public String rename(){
+		redisTool.rename(keys,value);
+		return null;
+	}
+	
 	public String removeListValue(){
 		redisTool.removeListValue(keys,value);
 		return null;
