@@ -21,7 +21,7 @@ import org.springframework.data.redis.core.SessionCallback;
  * 
  * @author lisq
  * 
- */ 
+ */
 
 @SuppressWarnings("unchecked")
 public class BaseRedisTool {
@@ -77,9 +77,10 @@ public class BaseRedisTool {
 			}
 		});
 	}
-	
+
 	/**
 	 * 返回一个map对应的全部的值.
+	 * 
 	 * @param k
 	 * @return
 	 */
@@ -88,7 +89,7 @@ public class BaseRedisTool {
 			@Override
 			public Map<byte[], byte[]> doInRedis(RedisConnection connection)
 					throws DataAccessException {
-				return  connection.hGetAll(k); 
+				return connection.hGetAll(k);
 			}
 		});
 	}
@@ -177,19 +178,20 @@ public class BaseRedisTool {
 
 		});
 	}
-	
+
 	/**
 	 * 返回一个hash对应键的值.
+	 * 
 	 * @param h
 	 * @param key
 	 * @return
 	 */
-	public byte[] getHashByKey(final byte[] h,final byte[] key) {
+	public byte[] getHashByKey(final byte[] h, final byte[] key) {
 		return template.execute(new RedisCallback<byte[]>() {
 			@Override
 			public byte[] doInRedis(RedisConnection connection)
 					throws DataAccessException {
-				return connection.hGet(h,key);
+				return connection.hGet(h, key);
 			}
 
 		});
@@ -334,6 +336,93 @@ public class BaseRedisTool {
 		});
 	}
 
+	private byte[] strToByte(String s) {
+		return s.getBytes();
+	}
+
+	public void addKey(String keytype, String newKeyName, String val1,
+			String val2) {
+		final byte[] k = strToByte(keytype);
+		final String str2 = val2;
+		final byte[] n = strToByte(newKeyName);
+		final byte[] v1 = strToByte(val1);
+		final byte[] v2 = strToByte(val2);
+		if ("str".equals(keytype)) {
+			template.execute(new RedisCallback() {
+				@Override
+				public Object doInRedis(RedisConnection connection)
+						throws DataAccessException {
+					connection.set(n, v1);
+					return null;
+				}
+			});
+		} else if ("strnx".equals(keytype)) {
+			template.execute(new RedisCallback() {
+				@Override
+				public Object doInRedis(RedisConnection connection)
+						throws DataAccessException {
+					connection.setNX(n, v1);
+					return null;
+				}
+			});
+		} else if ("listL".equals(keytype)) {
+			template.execute(new RedisCallback() {
+				@Override
+				public Object doInRedis(RedisConnection connection)
+						throws DataAccessException {
+					connection.lPush(n, v1);
+					return null;
+				}
+			});
+		} else if ("listR".equals(keytype)) {
+			template.execute(new RedisCallback() {
+				@Override
+				public Object doInRedis(RedisConnection connection)
+						throws DataAccessException {
+					connection.rPush(n, v1);
+					return null;
+				}
+			});
+		} else if ("set".equals(keytype)) {
+			template.execute(new RedisCallback() {
+				@Override
+				public Object doInRedis(RedisConnection connection)
+						throws DataAccessException {
+					connection.sAdd(n, v1);
+					return null;
+				}
+			});
+		} else if ("zset".equals(keytype)) {
+			template.execute(new RedisCallback() {
+				@Override
+				public Object doInRedis(RedisConnection connection)
+						throws DataAccessException {
+					connection.zAdd(n, Double.parseDouble(str2), v1);
+					return null;
+				}
+			});
+		} else if ("hash".equals(keytype)) {
+			template.execute(new RedisCallback() {
+				@Override
+				public Object doInRedis(RedisConnection connection)
+						throws DataAccessException {
+					connection.hSet(n, v1, v2);
+					return null;
+				}
+			});
+		} else if ("hashnx".equals(keytype)) {
+			template.execute(new RedisCallback() {
+				@Override
+				public Object doInRedis(RedisConnection connection)
+						throws DataAccessException {
+					connection.hSetNX(n, v1, v2);
+					return null;
+				}
+			});
+		}
+
+	}
+
 	/**
 	 * 返回数据库的大小.
 	 * 
@@ -374,7 +463,7 @@ public class BaseRedisTool {
 			return;
 		final Set<byte[]> allKeys = allKeys(key.getBytes());
 		@SuppressWarnings("rawtypes")
-		SessionCallback sessionCallback = new SessionCallback() { 
+		SessionCallback sessionCallback = new SessionCallback() {
 			@Override
 			public Object execute(RedisOperations operations)
 					throws DataAccessException {
@@ -400,10 +489,10 @@ public class BaseRedisTool {
 		};
 		template.execute(sessionCallback);
 	}
- 
+
 	public void deleteKey(String key) {
 		if (key == null)
-			return; 
+			return;
 		final String keykey = key;
 
 		template.execute(new RedisCallback() {
@@ -416,15 +505,16 @@ public class BaseRedisTool {
 
 		});
 	}
-	
+
 	/**
 	 * 删除list里面的一个value.
+	 * 
 	 * @param key
 	 * @param value
 	 */
-	public void removeListValue(String key,String value) {
-		if (key == null||value==null)
-			return; 
+	public void removeListValue(String key, String value) {
+		if (key == null || value == null)
+			return;
 		final String keykey = key;
 		final String va = value;
 
@@ -432,15 +522,16 @@ public class BaseRedisTool {
 			@Override
 			public Object doInRedis(RedisConnection connection)
 					throws DataAccessException {
-				connection.lRem(keykey.getBytes(),0,va.getBytes());
+				connection.lRem(keykey.getBytes(), 0, va.getBytes());
 				return null;
 			}
 
 		});
 	}
-	public void rename(String key,String value) {
-		if (key == null||value==null)
-			return; 
+
+	public void rename(String key, String value) {
+		if (key == null || value == null)
+			return;
 		final String keykey = key;
 		final String va = value;
 
@@ -448,22 +539,22 @@ public class BaseRedisTool {
 			@Override
 			public Object doInRedis(RedisConnection connection)
 					throws DataAccessException {
-				connection.rename(keykey.getBytes(),va.getBytes());
+				connection.rename(keykey.getBytes(), va.getBytes());
 				return null;
 			}
 
 		});
 	}
-	
-	
+
 	/**
 	 * 删除set里面的值.
+	 * 
 	 * @param key
 	 * @param value
 	 */
-	public void removeSetValue(String key,String value) {
-		if (key == null||value==null)
-			return; 
+	public void removeSetValue(String key, String value) {
+		if (key == null || value == null)
+			return;
 		final String keykey = key;
 		final String va = value;
 
@@ -471,21 +562,22 @@ public class BaseRedisTool {
 			@Override
 			public Object doInRedis(RedisConnection connection)
 					throws DataAccessException {
-				connection.sRem(keykey.getBytes(),va.getBytes());
+				connection.sRem(keykey.getBytes(), va.getBytes());
 				return null;
 			}
 
 		});
 	}
-	
+
 	/**
 	 * 删除hash里面的值.
+	 * 
 	 * @param key
 	 * @param value
 	 */
-	public void removeHashValue(String key,String value) {
-		if (key == null||value==null)
-			return; 
+	public void removeHashValue(String key, String value) {
+		if (key == null || value == null)
+			return;
 		final String keykey = key;
 		final String va = value;
 
@@ -493,21 +585,22 @@ public class BaseRedisTool {
 			@Override
 			public Object doInRedis(RedisConnection connection)
 					throws DataAccessException {
-				connection.hDel(keykey.getBytes(),va.getBytes());
+				connection.hDel(keykey.getBytes(), va.getBytes());
 				return null;
 			}
 
 		});
 	}
-	
+
 	/**
 	 * 删除指定的权重的数值.
+	 * 
 	 * @param key
 	 * @param value
 	 */
-	public void removeZScore(String key,String value) {
-		if (key == null||value==null)
-			return; 
+	public void removeZScore(String key, String value) {
+		if (key == null || value == null)
+			return;
 		final String keykey = key;
 		final String va = value;
 
@@ -515,7 +608,7 @@ public class BaseRedisTool {
 			@Override
 			public Object doInRedis(RedisConnection connection)
 					throws DataAccessException {
-				connection.zRem(keykey.getBytes(),va.getBytes());
+				connection.zRem(keykey.getBytes(), va.getBytes());
 				return null;
 			}
 

@@ -8,12 +8,16 @@ public class Key {
 		this.k = k;
 	}
 
-	public Key add(String s) {
-		return KeyFactory.getInstance().getKey(this.k += SPLIT + s);
+	public Key add(String s) { 
+		this.k+=SPLIT + s;
+		//return KeyFactory.getInstance().getKey(k);
+		return this;
 	}
 
 	public Key add(int s) {
-		return KeyFactory.getInstance().getKey(this.k += SPLIT + s);
+		this.k+=SPLIT + s;
+		return this;
+		//return KeyFactory.getInstance().getKey(k + SPLIT + s);
 	}
 
 	public byte[] getId() {

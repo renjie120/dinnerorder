@@ -11,8 +11,9 @@ import org.apache.struts2.ServletActionContext;
 
 /**
  * reids管理小工具.
+ * 
  * @author lsq
- *
+ * 
  */
 public class RedisManagerAction {
 	// 序列号
@@ -24,6 +25,7 @@ public class RedisManagerAction {
 	private String config;
 	private String keys;
 	private String value;
+
 	public String getValue() {
 		return value;
 	}
@@ -61,42 +63,43 @@ public class RedisManagerAction {
 	public void setRedisTool(BaseRedisTool redisTool) {
 		this.redisTool = redisTool;
 	}
- 
+
 	public String manager() {
-		HttpServletRequest request = ServletActionContext.getRequest(); 
+		HttpServletRequest request = ServletActionContext.getRequest();
 		request.setAttribute("count", redisTool.dbSize());
 		return "manager";
 	}
 
-	public String deleteKey(){
+	public String deleteKey() {
 		redisTool.deleteKey(keys);
 		return null;
 	}
-	
-	public String rename(){
-		redisTool.rename(keys,value);
+
+	public String rename() {
+		redisTool.rename(keys, value);
 		return null;
 	}
-	
-	public String removeListValue(){
-		redisTool.removeListValue(keys,value);
+
+	public String removeListValue() {
+		redisTool.removeListValue(keys, value);
 		return null;
 	}
-	
-	public String removeSetValue(){
-		redisTool.removeSetValue(keys,value);
-		return null;
-	} 
-	
-	public String removeZScore(){
-		redisTool.removeZScore(keys,value);
+
+	public String removeSetValue() {
+		redisTool.removeSetValue(keys, value);
 		return null;
 	}
-	
-	public String removeHashValue(){
-		redisTool.removeHashValue(keys,value);
+
+	public String removeZScore() {
+		redisTool.removeZScore(keys, value);
 		return null;
 	}
+
+	public String removeHashValue() {
+		redisTool.removeHashValue(keys, value);
+		return null;
+	}
+
 	/**
 	 * 返回全部的控制台信息.
 	 * 
@@ -122,25 +125,82 @@ public class RedisManagerAction {
 	 * @return
 	 */
 	public String exists() {
-		if (exists != null){
-			if(redisTool.existsKey(exists.getBytes()))
+		if (exists != null) {
+			if (redisTool.existsKey(exists.getBytes()))
 				write("" + redisTool.getJsonData(exists.getBytes()));
 			else
 				write("{'type':'none'}");
-		}
-		else
+		} else
 			write("必须输入键！");
 		return null;
 	}
 
 	public void write(String str) {
-		HttpServletResponse response = ServletActionContext.getResponse(); 
+		HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("text/html;charset=GBK");
 		try {
 			response.getWriter().print(str);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private String keytype;
+	private String val1;
+	private String newKeyName;
+
+	public String getNewKeyName() {
+		return newKeyName;
+	}
+
+	public void setNewKeyName(String newKeyName) {
+		this.newKeyName = newKeyName;
+	}
+
+	public String getKeytype() {
+		return keytype;
+	}
+
+	public void setKeytype(String keytype) {
+		this.keytype = keytype;
+	}
+
+	public String getVal1() {
+		return val1;
+	}
+
+	public void setVal1(String val1) {
+		this.val1 = val1;
+	}
+
+	public String getVal2() {
+		return val2;
+	}
+
+	public void setVal2(String val2) {
+		this.val2 = val2;
+	}
+
+	private String val2;
+
+	public String addKey() {
+		HttpServletResponse response = ServletActionContext.getResponse();
+		response.setContentType("text/html;charset=GBK");
+		try {
+			redisTool.addKey(keytype, newKeyName, val1, val2);
+			response.getWriter().print("添加值到" + newKeyName + "类型成功."); 
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				response.getWriter().print("添加值到" + newKeyName + "类型失败.");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -160,7 +220,7 @@ public class RedisManagerAction {
 			if (str != null)
 				build.append("'" + new String(str)).append("',");
 		}
-		if(configs!=null&&configs.size()>0)
+		if (configs != null && configs.size() > 0)
 			build = build.deleteCharAt(build.lastIndexOf(","));
 		build.append("]");
 		write(build.toString());
