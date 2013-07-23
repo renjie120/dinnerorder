@@ -12,56 +12,74 @@
 	String path = request.getContextPath();
 	String basePath = request.getScheme() + "://"
 			+ request.getServerName() + ":" + request.getServerPort()
-			+ path + "/"; 
-		IDinner dinner = (IDinner) SpringContextUtil.getBean("dinnerImpl");
-		 List<Login> logins = dinner.getLogins();
-	
+			+ path + "/";
+	IDinner dinner = (IDinner) SpringContextUtil.getBean("dinnerImpl");
+	List<Login> logins = dinner.getLogins();
 %>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
-<base href="<%=basePath%>"> 
+<base href="<%=basePath%>">
 <script type="text/javascript"
 	src="<%=basePath%>/js/jquery-1.7.1.min.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript">
-function login(){
-	var p = [];
-	p.push("groupName=" + $('#groupName').val());
-	p.push("groupNameList=" + $('#groupNameList').val());
-	p.push("pass=" + $('#pass').val());
-	if ( $('#groupName').val()== '' && $('#groupNameList').val() == '-1') {
+function login() {
+		var p = [];
+		p.push("groupName=" + $('#groupName').val());
+		p.push("groupNameList=" + $('#groupNameList').val());
+		p.push("pass=" + $('#pass').val());
+		if ($('#groupName').val() == '' && $('#groupNameList').val() == '-1') {
 			alert("必须填写登录分组名或者选择一个!");
 			return false;
 		}
-	var param = p.join('&');
-	$.ajax({
+		var param = p.join('&');
+		$.ajax({
 			url : "dinner!login.action",
 			data : param,
 			type : 'POST',
 			dataType : 'json',
 			success : function(x) {
 				alert(x);
-				location.href = "dinner!init.action"; 
+				location.href = "dinner!init.action";
 			},
 			error : function(x, textStatus, errorThrown) {
 				alert(x.responseText);
-				location.href = "dinner!init.action"; 
+				location.href = "dinner!init.action";
 			}
 		});
-}
+	}
 </script>
-
 </head>
 <body>
-	分组:<input name="groupName" id="groupName"/>
-	<select id="groupNameList"><option value="-1">请选择</option>
-	<%
-	if(logins!=null&&logins.size()>0)
-	for(Login g:logins){%>
-		<option value="<%=g.getSno()%>"><%=g.getGroupName()%></option>
-	<%}%></select>
-	密码:<input type="password" id="pass"/><br>
-	<button onclick="login()">登录(若是新分组，则自动注册新分组,记住密码,下次选择分组即可.)</button> 
+	<table >
+		<tr>
+			<td>分组</td>
+			<td><select id="groupNameList" style="width: 200px"><option
+						value="-1">请选择</option>
+					<%
+						if (logins != null && logins.size() > 0)
+							for (Login g : logins) {
+					%>
+					<option value="<%=g.getSno()%>"><%=g.getGroupName()%></option>
+					<%
+						}
+					%></select></td>
+		</tr>
+		<tr>
+			<td>新建分组</td>
+			<td><input name="groupName" id="groupName" /></td>
+		</tr>
+		<tr>
+			<td>管理员密码</td>
+			<td><input type="password" id="pass" /></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<button onclick="login()">登录(若是新分组，则自动注册新分组,记住密码,下次选择分组即可.)</button>
+			</td>
+		</tr>
+	</table>
+	<br>
 	<a href="redisManager!manager.action">redis控制台</a>
-	<br> 
+	<br>
 </body>
 </html>

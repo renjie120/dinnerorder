@@ -41,12 +41,14 @@
 <LINK rel=stylesheet type=text/css href="<%=basePath%>/css/reset.css">
 <LINK rel=stylesheet type=text/css href="<%=basePath%>/css/style.css">
 <script type="text/javascript">
-	 function initload() {  
+	$(document).ready(function(){
 		<%if(userId==null||"-1".equals(userId+"")){ %>
-			$('img').remove();
+			$('img[tag!=1]').remove(); 
 		<%}%>
-	}
-
+		if($('#gName').text()=='null'){
+			$('img[tag!=1]').remove(); 
+		} 
+	}); 
 	/**充值.
 	 */
 	function saveRecharge() {
@@ -85,9 +87,9 @@
 		});
 	}
 	
-	function findVByName(dName){
+	function findVByName(v,dName){
 		var result = -1;
-		$('#dinnerNameList option').each(function(){ 
+		$('#'+v+' option').each(function(){ 
 			if($(this).html()==dName){
 				result = $(this).val();
 				return ;
@@ -105,7 +107,7 @@
 		if ($('#peopleName').val() == '' && $('#peopleList').val() == '-1') {
 			alert("必须填写人名或者选择人名!");
 			return false;
-		}
+		} 
 		if (isNaN($('#money').val() ) ){
 			alert("请输入有效金额!");
 			return false;
@@ -116,7 +118,7 @@
 			return false;
 		}
 		if(dName != ''){ 
-			var _v = findVByName(dName); 
+			var _v = findVByName('dinnerNameList',dName); 
 			if(_v!=-1){
 			 	$('#dinnerNameList').val(_v);
 			 	$('#dinnerName').val('');
@@ -287,8 +289,8 @@ a {
 </style>
 </style>
 </head>
-<body style="overflow: auto;" onload="initload()">
-	当前分组：<%=groupName%>
+<body style="overflow: auto;">
+	当前分组：<label id="gName"><%=groupName%></label>
 	<input id="groupSno" type="hidden" value="<%=groupSno%>">
 	<table>
 		<tr>
@@ -300,8 +302,8 @@ a {
 								<th colspan="2">订餐</th>
 								<tr>
 									<td>时间</td>
-									<td><input id="moneyTime" type="text" readOnly='true' value="2013-7-1">
-										<img onclick="WdatePicker({el:$dp.$('moneyTime')})"
+									<td><input id="moneyTime" type="text" readOnly='true'>
+										<img onclick="WdatePicker({el:$dp.$('moneyTime')})" tag='1'
 										src="<%=basePath%>/js/common/datepicker/images/calendar.gif">
 									</td>
 								</tr>
@@ -357,7 +359,7 @@ a {
 								<tr>
 									<td>时间</td>
 									<td><input id="rechargeMoneyTime" type="text"
-										readOnly='true'> <img
+										readOnly='true'> <img tag='1'
 										onclick="WdatePicker({el:$dp.$('rechargeMoneyTime')})"
 										src="<%=basePath%>/js/common/datepicker/images/calendar.gif">
 									</td>
@@ -386,6 +388,8 @@ a {
 								</tr>
 							</table>
 						</td>
+						<%
+						 if(!(userId==null||"null".equals(userId+""))){ %>
 						<td>
 							<table>
 								<tr>
@@ -404,6 +408,7 @@ a {
 								</td>
 							</table>
 						</td>
+						<%}  %> 
 						<td>
 							<table>
 								<tr>
