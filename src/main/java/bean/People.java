@@ -44,9 +44,9 @@ public class People implements Serializable, Comparable {
 	public int compareTo(Object o) {
 		double d = this.rechargeSum - ((People) o).getRechargeSum();
 		if (d > 0) {
-			return 1;
-		} else if (d < 0) {
 			return -1;
+		} else if (d < 0) {
+			return 1;
 		} else
 			return 0;
 	}

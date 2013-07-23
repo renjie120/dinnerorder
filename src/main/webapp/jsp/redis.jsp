@@ -13,6 +13,13 @@
 <base href="<%=basePath%>"> 
 <script type="text/javascript" src="<%=basePath%>/js/jquery-1.7.1.min.js"></script> 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.title {
+	font-size:14px;
+	color:red;
+	font-weight:bold;
+}
+</style>
 <script type="text/javascript">
 	function init(str) {
 
@@ -48,14 +55,15 @@
 								success : function(d) {
 									 eval("var data="+d);
 									if(data.type=='string'){
-										$('#existsTable').prepend('<tr ><td  >'+$('[name=exists]').val()+'</td><td ><img src="<%=basePath%>/jsp/onError.gif" onclick="deletethis(this)"/></td></tr><tr><td>字符串</td><td>'+data.value+'</td></tr>');
+										$('#existsTable').prepend('<tr  class="title"><td  >'+$('[name=exists]').val()+'</td><td ><img src="<%=basePath%>/jsp/onError.gif" onclick="deletethis(this)"/></td></tr><tr><td>字符串</td><td>'+data.value+'</td></tr>');
 									}else if(data.type=='hash'){ 
 										 var buf = [];
-										 buf.push("<tr><td>类型</td><td>hash</td></tr>");
+										 var _v = $('[name=exists]').val();
+										  buf.push("<tr><td>类型</td><td>hash</td></tr>");
 										 for(var ii in data.value){
-											 	buf.push("<tr><td>"+data.value[ii].key+"</td><td>"+data.value[ii].value+"</td></tr>");  
+											 	buf.push("<tr><td>"+data.value[ii].key+"</td><td>"+data.value[ii].value+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' lv='"+_v+"' onclick='removeHash(this)'/></td></tr>");  
 										 }
-										 $('#existsTable').prepend("<tr><td  >"+$('[name=exists]').val()+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr  class='title'><td  >"+$('[name=exists]').val()+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
 									}else if(data.type=='list'){ 
 										 var buf = [];
 										 var _v = $('[name=exists]').val();
@@ -63,7 +71,7 @@
 										 for(var ii in data.value){
 											 	buf.push("<tr><td >"+data.value[ii]+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' lv='"+_v+"' onclick='removeList(this)'/></td></tr>");   
 										 }
-										 $('#existsTable').prepend("<tr><td >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr class='title'><td >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
 									}else if(data.type=='set'){ 
 										 var buf = [];
 										 var _v = $('[name=exists]').val();
@@ -71,16 +79,18 @@
 										 for(var ii in data.value){
 											 	buf.push("<tr><td >"+data.value[ii]+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' lv='"+_v+"' onclick='removeSet(this)'/></td></tr>");   
 										 }
-										 $('#existsTable').prepend("<tr><td >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr  class='title'><td >"+_v+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
 									}else if(data.type=='zset'){ 
 										 var buf = [];
+										 var _v = $('[name=exists]').val();
 										 buf.push("<tr><td>类型</td><td>zset</td></tr><tr><td>键</td><td>分数</td></tr>");
 										 for(var ii in data.value){
-											 	buf.push("<tr><td>"+data.value[ii].value+"</td><td>"+data.value[ii].score+"</td></tr>");   
+											 	buf.push("<tr><td>"+data.value[ii].value+"</td><td>"+data.value[ii].score+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' lv='"+_v+"' onclick='removeZScore(this)'/></td></tr>");   
 										 }
-										 $('#existsTable').prepend("<tr><td  >"+$('[name=exists]').val()+"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
+										 $('#existsTable').prepend("<tr  class='title'><td  >"+$('[name=exists]').val()
+												 +"</td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td></tr>"+buf.join(''));
 									}else{
-										 $('#existsTable').prepend("<tr><td colspan='2'>"+$('[name=exists]').val()+"</td></tr>"+'<tr><td>没有查找到</td></tr>');
+										 $('#existsTable').prepend("<tr  class='title'><td colspan='2'>"+$('[name=exists]').val()+"</td></tr>"+'<tr><td>没有查找到</td></tr>');
 									}
 								}
 							});
@@ -95,10 +105,10 @@
 											 eval("var data="+d);
 											 var i =0;
 											 var buf = [];
-											 buf.push("<tr><td >"+$('[name=keys]').val()+"</td></tr>");
+											 buf.push("<tr class='title'><td >查找："+$('[name=keys]').val()+"结果如下:</td></tr>");
 											 for(var ii in data){ 
 													buf.push("<tr><td>"+data[ii]+"</td></tr>");   
-											 }
+											 } 
 											 $('#keysTable').prepend(buf.join(''));
 										}
 									});
@@ -148,6 +158,35 @@
 			}); 
 		}
 	}
+	
+	function removeZScore(obj){
+		if(confirm('确定删除么?')){
+			var v = $(obj).parent().prev().prev().html();
+			var lv = $(obj).attr('lv');
+			 $.ajax({
+				url : "redisManager!removeZScore.action",
+				data : "value=" + v+"&keys="+lv,
+				type : "post",
+				success : function(d) {
+					 $(obj).parent().parent().remove();
+				}
+			}); 
+		}
+	}
+	function removeHash(obj){
+		if(confirm('确定删除么?')){
+			var v = $(obj).parent().prev().prev().html();
+			var lv = $(obj).attr('lv');
+			 $.ajax({
+				url : "redisManager!removeHashValue.action",
+				data : "value=" + v+"&keys="+lv,
+				type : "post",
+				success : function(d) {
+					 $(obj).parent().parent().remove();
+				}
+			}); 
+		}
+	}
 </script>
 </head>
 <body>
@@ -155,7 +194,7 @@
 	<hr>
 	<br>
 	<input name="config">
-	<button id="seeConfig">查看配置信息</button>
+	<button id="seeConfig">查看redis配置信息(例如：config*)</button>
 	<br>
 	<table id='configTable'></table>
 	
@@ -167,7 +206,7 @@
 	
 	<hr>
 	<input name="exists">
-	<button id="exisKey">查询键值</button>
+	<button id="exisKey">查询键值(对指定键值进行查询，删除，修改,重命名等操作)</button>
 	<br>
 	<table id='existsTable'></table>
 </body>

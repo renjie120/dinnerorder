@@ -8,15 +8,15 @@
 <html>
 <head>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<title>redis简易控制台</title>
+<title>订餐界面</title>
 <%
 	BaseRedisTool tool = (BaseRedisTool) SpringContextUtil
 			.getBean("redisTool");
 	String path = request.getContextPath();
-	String groupName =""+session.getAttribute("groupName");
-	String groupSno =""+session.getAttribute("groupSno");
-	String userId =""+session.getAttribute("userNo");
-	 String basePath = request.getScheme() + "://"
+	String groupName = "" + session.getAttribute("groupName");
+	String groupSno = "" + session.getAttribute("groupSno");
+	String userId = "" + session.getAttribute("userNo");
+	String basePath = request.getScheme() + "://"
 			+ request.getServerName() + ":" + request.getServerPort()
 			+ path + "/";
 	IDinner dinner = (IDinner) SpringContextUtil.getBean("dinnerImpl");
@@ -24,10 +24,16 @@
 	List<ReCharge> rechargs = (List<ReCharge>) request
 			.getAttribute("rechargs");
 	List<Order> orders = (List<Order>) request.getAttribute("orders");
-	List<Dinner> dinners = (List<Dinner>) request.getAttribute("dinners");
+	List<Dinner> dinners = (List<Dinner>) request
+			.getAttribute("dinners");
 	List<Menu> menus = (List<Menu>) request.getAttribute("menus");
 	List<String> allTime = (List<String>) request
 			.getAttribute("allTime");
+	List<String> thisGroupRecharge = new ArrayList<String>();
+	if(groupSno!=null&&!"null".equals(groupSno)){
+		thisGroupRecharge = dinner
+				.getRechargeByGroup(Integer.parseInt(groupSno));
+	}
 %>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <base href="<%=basePath%>">
@@ -42,13 +48,13 @@
 <LINK rel=stylesheet type=text/css href="<%=basePath%>/css/style.css">
 <script type="text/javascript">
 	$(document).ready(function(){
-		<%if(userId==null||"-1".equals(userId+"")){ %>
-			$('img[tag!=1]').remove(); 
+		<%if (userId == null || "-1".equals(userId + "")) {%>
+			$('img[tag!=1]').remove();
 		<%}%>
-		if($('#gName').text()=='null'){
-			$('img[tag!=1]').remove(); 
-		} 
-	}); 
+		if ($('#gName').text() == 'null') {
+			$('img[tag!=1]').remove();
+		}
+	});
 	/**充值.
 	 */
 	function saveRecharge() {
@@ -60,9 +66,10 @@
 			return false;
 		}
 		p.push("rechargeMoneyTime=" + $('#rechargeMoneyTime').val());
+		p.push("groupSno=" + $('#groupSno').val());
 		p.push("rechargePeopleList=" + $('#rechargePeopleList').val());
 		p.push("rechargeMoney=" + $('#rechargeMoney').val());
-		if (isNaN($('#rechargeMoney').val() ) ){
+		if (isNaN($('#rechargeMoney').val())) {
 			alert("请输入有效金额!");
 			return false;
 		}
@@ -86,13 +93,13 @@
 			}
 		});
 	}
-	
-	function findVByName(v,dName){
+
+	function findVByName(v, dName) {
 		var result = -1;
-		$('#'+v+' option').each(function(){ 
-			if($(this).html()==dName){
+		$('#' + v + ' option').each(function() {
+			if ($(this).html() == dName) {
 				result = $(this).val();
-				return ;
+				return;
 			}
 		});
 		return result;
@@ -107,24 +114,25 @@
 		if ($('#peopleName').val() == '' && $('#peopleList').val() == '-1') {
 			alert("必须填写人名或者选择人名!");
 			return false;
-		} 
-		if (isNaN($('#money').val() ) ){
+		}
+		if (isNaN($('#money').val())) {
 			alert("请输入有效金额!");
 			return false;
 		}
 		var dName = $('#dinnerName').val();
-		if ( dName== '' && $('#dinnerNameList').val() == '-1') {
+		if (dName == '' && $('#dinnerNameList').val() == '-1') {
 			alert("必须填写菜名或者选择菜名!");
 			return false;
 		}
-		if(dName != ''){ 
-			var _v = findVByName('dinnerNameList',dName); 
-			if(_v!=-1){
-			 	$('#dinnerNameList').val(_v);
-			 	$('#dinnerName').val('');
+		if (dName != '') {
+			var _v = findVByName('dinnerNameList', dName);
+			if (_v != -1) {
+				$('#dinnerNameList').val(_v);
+				$('#dinnerName').val('');
 			}
 		}
 		p.push("moneyTime=" + $('#moneyTime').val());
+		p.push("groupSno=" + $('#groupSno').val());
 		p.push("peopleName=" + $('#peopleName').val());
 		p.push("peopleList=" + $('#peopleList').val());
 		p.push("dinnerNameList=" + $('#dinnerNameList').val());
@@ -192,7 +200,7 @@
 		});
 	}
 
-	function deleteThisOrder(od) { 
+	function deleteThisOrder(od) {
 		$.ajax({
 			url : "dinner!deleteOrder.action",
 			data : "id=" + od,
@@ -211,8 +219,9 @@
 	}
 
 	function goUrl(sno) {
-		window.open(
-						 'dinner!goUrl.action?id=' + sno,
+		window
+				.open(
+						'dinner!goUrl.action?id=' + sno,
 						'newwindow',
 						'height=500, width=400, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no');
 		location.reload();
@@ -241,7 +250,8 @@
 				alert(x.responseText);
 				location.reload();
 				$('#menuName').val('');
-				$('#menuName').val('');
+				$('#menuName').va
+l('');
 			}
 		});
 	}
@@ -290,7 +300,9 @@ a {
 </style>
 </head>
 <body style="overflow: auto;">
-	当前分组：<label id="gName"><%=groupName%></label>
+	<h1>
+		<font color="red">当前分组：<label id="gName"><%=groupName%></label></font>
+	</h1>
 	<input id="groupSno" type="hidden" value="<%=groupSno%>">
 	<table>
 		<tr>
@@ -322,7 +334,8 @@ a {
 								</tr>
 								<tr>
 									<td>菜名</td>
-									<td><input id='dinnerName'  /> <select id='dinnerNameList' >
+									<td><input id='dinnerName' /> <select
+										id='dinnerNameList'>
 											<option value="-1">请选择</option>
 											<%
 												for (Dinner p : dinners) {
@@ -335,7 +348,7 @@ a {
 								</tr>
 								<tr>
 									<td>金额</td>
-									<td><input id='money'  /></td>
+									<td><input id='money' /></td>
 								</tr>
 								<tr>
 									<td>是否单点</td>
@@ -389,7 +402,8 @@ a {
 							</table>
 						</td>
 						<%
-						 if(!(userId==null||"null".equals(userId+""))){ %>
+							if (!(userId == null || "null".equals(userId + ""))) {
+						%>
 						<td>
 							<table>
 								<tr>
@@ -408,7 +422,9 @@ a {
 								</td>
 							</table>
 						</td>
-						<%}  %> 
+						<%
+							}
+						%>
 						<td>
 							<table>
 								<tr>
@@ -438,8 +454,8 @@ a {
 			<td colspan="3"><hr></td>
 		</tr>
 		<tr>
-			<td style="valign:top">
-				<table >
+			<td style="valign: top">
+				<table>
 					<%
 						//按照订餐人数的次数优先级显示出来全部的人员.
 						Set<Tuple> peopleSet = tool.getListWithScore(RedisColumn
@@ -472,9 +488,13 @@ a {
 							if (!tool.existsKey(RedisColumn.timeToOrder(t))) {
 								continue;
 							}
+							//得到当前分组号
+							int _gid = Integer.parseInt(groupSno);
+							List<String> groupOrderSet = dinner.getOrderByGroupAndDay(_gid,
+									t);
 					%>
 					<tr>
-						<td><%=t+"("+dinner.getSumByDay(t)+")"%></td>
+						<td><%=t + "(" + dinner.getSumByDay(t) + ")"%></td>
 						<%
 							//按照订餐人数的次数优先级显示出来全部的人员.
 								Iterator<Tuple> it2 = peopleSet.iterator();
@@ -489,14 +509,18 @@ a {
 						<td>
 							<%
 								for (String _o : thisDayOrders) {
-							%> <%=tool.getKey(RedisColumn.orderDinner(Integer
-								.parseInt(_o)))
-								+ "("
-								+ tool.getKey(RedisColumn.orderMoney(Integer
-										.parseInt(_o))) + ")"%> <img
+											//在当天的分组的集合里面就打印出来.
+											if (groupOrderSet.indexOf(_o) != -1) {
+							%> <%=tool.getKey(RedisColumn
+									.orderDinner(Integer.parseInt(_o)))
+									+ "("
+									+ tool.getKey(RedisColumn
+											.orderMoney(Integer.parseInt(_o)))
+									+ ")"%> <img
 							src="<%=basePath%>/jsp/onError.gif"
 							onclick="javascript:deleteThisOrder('<%=_o%>')" /> <%
  	}
+ 			}
  %>
 
 						</td>
@@ -510,6 +534,7 @@ a {
 					%>
 				</table>
 			</td>
+			<!-- 
 			<td style="valign:top">
 				<table>
 					<tr>
@@ -522,9 +547,7 @@ a {
 						<td>金额</td>
 						<td>删除</td>
 					</tr>
-					<%
-						for (Order o : orders) {
-					%>
+					<%for (Order o : orders) {%>
 					<tr>
 						<td><%=o.getTime()%></td>
 						<td><%=tool.getKey(RedisColumn.peopleName(o.getPeopleSno()))%>
@@ -534,12 +557,11 @@ a {
 						<td><img src="<%=basePath%>/jsp/onError.gif"
 							onclick="javascript:deleteThisOrder('<%=o.getSno()%>')" /></td>
 					</tr>
-					<%
-						}
-					%>
+					<%}%>
 				</table>
 			</td>
-			<td style="valign:top">
+			 -->
+			<td style="valign: top">
 				<table>
 					<tr>
 						<th colspan="4">查看充值历史</th>
@@ -552,16 +574,19 @@ a {
 					</tr>
 					<%
 						for (ReCharge o : rechargs) {
+							if (thisGroupRecharge.indexOf(o.getSno() + "")!=-1) {
 					%>
 					<tr>
 						<td><%=o.getTime()%></td>
-						<td><%=tool.getKey(RedisColumn.peopleName(o.getPeopleSno()))%>
+						<td><%=tool.getKey(RedisColumn.peopleName(o
+							.getPeopleSno()))%>
 						</td>
 						<td><%=o.getMoney()%></td>
 						<td><img src="<%=basePath%>/jsp/onError.gif"
 							onclick="javascript:deleteThisRecharge('<%=o.getSno()%>')" /></td>
 					</tr>
 					<%
+						}
 						}
 					%>
 				</table>

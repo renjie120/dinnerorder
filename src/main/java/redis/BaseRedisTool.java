@@ -460,4 +460,48 @@ public class BaseRedisTool {
 
 		});
 	}
+	
+	/**
+	 * 删除hash里面的值.
+	 * @param key
+	 * @param value
+	 */
+	public void removeHashValue(String key,String value) {
+		if (key == null||value==null)
+			return; 
+		final String keykey = key;
+		final String va = value;
+
+		template.execute(new RedisCallback() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				connection.hDel(keykey.getBytes(),va.getBytes());
+				return null;
+			}
+
+		});
+	}
+	
+	/**
+	 * 删除指定的权重的数值.
+	 * @param key
+	 * @param value
+	 */
+	public void removeZScore(String key,String value) {
+		if (key == null||value==null)
+			return; 
+		final String keykey = key;
+		final String va = value;
+
+		template.execute(new RedisCallback() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				connection.zRem(keykey.getBytes(),va.getBytes());
+				return null;
+			}
+
+		});
+	}
 }

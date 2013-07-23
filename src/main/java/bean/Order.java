@@ -10,6 +10,16 @@ public class Order implements Serializable {
 	private int peopleSno;
 	private int sno;
 	private String dinnerName;
+	private String groupSno;
+	public String getGroupSno() {
+		return groupSno;
+	}
+
+	public void setGroupSno(String groupSno) {
+		this.groupSno = groupSno;
+	}
+
+
 	private int dinnerNameList;
 	public String getDinnerName() {
 		return dinnerName;

@@ -149,6 +149,15 @@ public class DinnerAction {
 		return "dinner";
 	}
 
+	private String groupSno;
+	public String getGroupSno() {
+		return groupSno;
+	}
+
+	public void setGroupSno(String groupSno) {
+		this.groupSno = groupSno;
+	}
+
 	/**
 	 * 保存订单信息.
 	 * 
@@ -158,6 +167,7 @@ public class DinnerAction {
 		Order order = new Order();
 		order.setDinner(dinnerName);
 		order.setIsSingle(single);
+		order.setGroupSno(groupSno);
 		order.setMoney(money);
 		order.setDinnerName(dinnerName);
 		order.setDinnerNameList(Integer.parseInt(dinnerNameList));
@@ -225,7 +235,7 @@ public class DinnerAction {
 		request.setAttribute("rankPeople", p);
 		request.setAttribute("title", "充值金额统计排行榜");
 		return "newTable";
-	}
+	} 
 
 	/**
 	 * 根据菜名的订单数的清单.
@@ -263,6 +273,7 @@ public class DinnerAction {
 	public String saveRecharge() {
 		ReCharge recharge = new ReCharge();
 		recharge.setMoney(rechargeMoney);
+		recharge.setGroupSno(groupSno);
 		recharge.setTime(rechargeMoneyTime);
 		recharge.setPeopleSno(Integer.parseInt(rechargePeopleList));
 		dinner.saveRecharge(recharge);
@@ -337,7 +348,7 @@ public class DinnerAction {
 			request.getSession().setAttribute("groupSno", lll.getSno());
 			try {
 				response.setContentType("text/html;charset=GBK");
-				response.getWriter().write("欢迎进入"+lll.getGroupName()+"订餐界面!");
+				response.getWriter().write("欢迎进入\""+lll.getGroupName()+"\"订餐界面!");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -348,7 +359,7 @@ public class DinnerAction {
 				request.getSession().setAttribute("groupSno", lll.getSno());
 				request.getSession().setAttribute("groupName", lll.getGroupName());
 				response.setContentType("text/html;charset=GBK");
-				response.getWriter().write("验证失败，将以游客身份登录"+lll.getGroupName()+"订餐界面!");
+				response.getWriter().write("验证失败，将以游客身份登陆\""+lll.getGroupName()+"\"订餐界面!");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

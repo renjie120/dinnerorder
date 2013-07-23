@@ -13,6 +13,13 @@ public class ReCharge implements Serializable {
 	private int peopleSno; 
 	private String time;
 	private String money;
+	private String groupSno;
+	public String getGroupSno() {
+		return groupSno;
+	}
+	public void setGroupSno(String groupSno) {
+		this.groupSno = groupSno;
+	}
 	private int sno;
 	public int getPeopleSno() {
 		return peopleSno;

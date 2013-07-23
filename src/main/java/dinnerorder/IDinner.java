@@ -1,6 +1,7 @@
 package dinnerorder;
 
 import java.util.List;
+import java.util.Set;
 
 import bean.Dinner;
 import bean.Login;
@@ -88,6 +89,22 @@ public interface IDinner {
 	public List<String> getOrderByPeopleInOneDay(int people,String time);
 
 	/**
+	 * 得到某个分组的充值记录.
+	 * @param time
+	 * @return
+	 */
+	public List<String> getRechargeByGroup(int group);
+
+	
+	/**
+	 * 返回当天含有的分组里面的订单.
+	 * @param groupSno
+	 * @param time
+	 * @return
+	 */
+	public List<String> getOrderByGroupAndDay(int groupSno,String time);
+
+	/**
 	 * 返回订单记录.
 	 * @return
 	 */
@@ -143,7 +160,7 @@ public interface IDinner {
 	 * @return
 	 */
 	public List<People> getPeopleByRechargesRank(); 
-	
+	  
 	/**
 	 * 得到某天的订餐金额总量.
 	 * @param tim

@@ -81,6 +81,16 @@ public class RedisManagerAction {
 	public String removeSetValue(){
 		redisTool.removeSetValue(keys,value);
 		return null;
+	} 
+	
+	public String removeZScore(){
+		redisTool.removeZScore(keys,value);
+		return null;
+	}
+	
+	public String removeHashValue(){
+		redisTool.removeHashValue(keys,value);
+		return null;
 	}
 	/**
 	 * 返回全部的控制台信息.
