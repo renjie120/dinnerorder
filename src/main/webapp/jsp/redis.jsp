@@ -17,23 +17,31 @@
 <style type="text/css">
 .open {
 	background: url(./jsp/bg.gif) no-repeat -443px -80px;
-	display:inline-block; *display:inline; *zoom:1;
+	display: inline-block;
+	*display: inline;
+	*zoom: 1;
 	width: 15px;
 	height: 18px;
 }
 
 .close {
 	background: url(./jsp/bg.gif) no-repeat -335px -119px;
-	display:inline-block; *display:inline; *zoom:1;
+	display: inline-block;
+	*display: inline;
+	*zoom: 1;
 	width: 15px;
 	height: 15px;
 }
+
 .set {
 	background: url(./jsp/bg.gif) no-repeat -333px -76px;
-	display:inline-block; *display:inline; *zoom:1;
+	display: inline-block;
+	*display: inline;
+	*zoom: 1;
 	width: 18px;
 	height: 21px;
 }
+
 .title {
 	font-size: 14px;
 	color: red;
@@ -45,6 +53,7 @@
 
 	} 
 	$(function() { 
+			$('select').width(100);
 			$('.title a[.open,.close]').live('click', function() { 
 			  $(this).toggleClass("open").toggleClass("close");
 			  $(this).parent().parent().next().toggle();
@@ -121,17 +130,11 @@
 										 buf.push('</table></div></td></tr>');
 										 $('#existsTable').prepend("<tr  class='title'><td  ><a class='close'></a><span>"+$('[name=exists]').val()
 												 +"</span></td><td ><img src='<%=basePath%>/jsp/onError.gif' onclick='deletethis(this)'/></td><td>重命名:<input rename id='"+_v+"' />"
-												 +"<a  class='set' onclick='rename(this)'></a></td></tr>"
+																		+ "<a  class='set' onclick='rename(this)'></a></td></tr>"
 																		+ buf.join(''));
 											} else {
-												$('#existsTable')
-														.prepend(
-																"<tr  class='title'><td colspan='2'>"
-																		+ $(
-																				'[name=exists]')
-																				.val()
-																		+ "</td></tr>"
-																		+ '<tr><td>没有查找到</td></tr>');
+												$('#existsTable').prepend("<tr  class='title'><td colspan='2'>"
+																		+ $('[name=exists]').val()+ "</td></tr>"+ '<tr><td>没有查找到</td></tr>');
 											}
 										}
 									});
@@ -185,10 +188,10 @@
 				});
 	});
 
-	function rename(obj) { 
+	function rename(obj) {
 		var v = $(obj).parent().parent().find('td').eq(0).text();
 		var newV = $(obj).prev().val();
-		if(newV==''){
+		if (newV == '') {
 			alert('不得命名为空!');
 			return false;
 		}
@@ -197,7 +200,8 @@
 			data : "keys=" + v + "&value=" + newV,
 			type : "post",
 			success : function(d) {
-				$(obj).parent().parent().find('td').eq(0).find('span').text(newV);
+				$(obj).parent().parent().find('td').eq(0).find('span').text(
+						newV);
 				$(obj).prev().val("");
 			}
 		});
@@ -292,17 +296,61 @@
 			$('#tip2').html('');
 		}
 	}
+
+	function addSystem(obj) {
+		var v = $(obj).prev().val();
+		var v2 = $(obj).prev().val();
+		if (v == '') {
+			alert('必填！');
+			return false;
+		}
+		$.ajax({
+			url : "redisManager!addSystem.action",
+			data : "value=" + v,
+			type : "post",
+			success : function(d) {
+
+			}
+		});
+	}
+
+	function addTable(obj) {
+		var v = $(obj).prev().html();
+		if (v == '') {
+			alert('必填！');
+			return false;
+		}
+		$.ajax({
+			url : "redisManager!addTable.action",
+			data : "value=" + v,
+			type : "post",
+			success : function(d) {
+				$(obj).parent().parent().remove();
+			}
+		});
+	}
+
+	function addColumn(obj) {
+		alert(this);
+	}
+
+	function addFormater(obj) {
+		alert(this);
+	}
+
+	function addMore() {
+		alert(this);
+	}
 </script>
 </head>
 <body>
 	全部keys数量:${count}
 	<hr>
-	<br>
 	<input name="config">
 	<button id="seeConfig">查看配置</button>
 	(例如：config*)
 	<br>
-	<table id='configTable'></table> 
+	<table id='configTable'></table>
 	<hr>
 	<input name="keys">
 	<button id="findKey">匹配key</button>
@@ -342,12 +390,38 @@
 	(在原有基础上添加，无则新建,不会删除以前数据)
 	<br>
 	<table id='addKeyTable'></table>
-	
-	<hr> 
+
+	<hr>
 	<button id="regist">注册表结构</button>
 	(添加键的自动生成策略)
 	<br>
-	<table id='regiestTable'></table> 
-	
+	<table id='regiestTable'>
+		<tr>
+			<td>系统名</td>
+			<td><input id="registerSystem" /><span class="set" onClick="addSystem(this)"></span></td>
+		</tr>
+		<tr>
+			<td>表名</td>
+			<td><select name="system" id="sel1"><option value="-1">请选择系统</option></select>
+				<input id="registerTable" /><span class="set" onclick="addTable(this)"></span></td>
+		</tr>
+		<tr>
+			<td>列名</td>
+			<td><select id="sel2" name="system"><option value="-1">请选择系统</option></select>
+				<select id="sel3" name="table"><option value="-1">请选择表名</option></select>
+				<input id="registerColumn" /> <span class="set"
+				onclick="addColumn(this)"></span></td>
+		</tr>
+		<tr>
+			<td>设置列内容</td>
+			<td><select id="sel4" name="system"><option value="-1">请选择系统</option></select>
+				<select name="table" id="sel5"><option value="-1">请选择表名</option></select>
+				<select name="column" id="sel6"><option value="-1">请选择列名</option></select>
+				列格式<input id="registerFormater" /> <span class="set"
+				onclick="addFormater(this)"></span> 添加更多：<span class="open"
+				onclick="addMore()"></span></td>
+		</tr>
+	</table>
+
 </body>
 </html>
