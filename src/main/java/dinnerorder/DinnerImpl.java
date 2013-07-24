@@ -91,12 +91,17 @@ public class DinnerImpl implements IDinner {
 								1, (dinnerId + "").getBytes());
 						connection.set(RedisColumn.orderSingle(val),
 								(p.getIsSingle()).getBytes());
-						//添加分组对应的订单映射条件.
+						// 添加分组对应的订单映射条件.
 						connection.set(RedisColumn.orderGroup(val),
 								(p.getGroupSno()).getBytes());
-						connection.sAdd(RedisColumn.groupToOrder(Integer.parseInt(p.getGroupSno())),
-								(val+"").getBytes());
-						
+						connection.sAdd(RedisColumn.groupToPeople(Integer
+								.parseInt(p.getGroupSno())),
+								(p.getPeopleSno() + "").getBytes());
+						// 添加当前分组的订单到一个集合中.
+						connection.sAdd(RedisColumn.groupToOrder(Integer
+								.parseInt(p.getGroupSno())), (val + "")
+								.getBytes());
+
 						connection.set(RedisColumn.orderTime(val),
 								(p.getTime()).getBytes());
 						connection.sAdd(RedisColumn.peopleToOrder(peopleId),
@@ -154,11 +159,12 @@ public class DinnerImpl implements IDinner {
 						connection.sAdd(
 								RedisColumn.peopleToRecharge(p.getPeopleSno()),
 								(val + "").getBytes());
-						//添加分组对应的订单映射条件.
+						// 添加分组对应的订单映射条件.
 						connection.set(RedisColumn.rechargeGroup(val),
 								(p.getGroupSno()).getBytes());
-						connection.sAdd(RedisColumn.groupToRecharge(Integer.parseInt(p.getGroupSno())),
-								(val+"").getBytes());
+						connection.sAdd(RedisColumn.groupToRecharge(Integer
+								.parseInt(p.getGroupSno())), (val + "")
+								.getBytes());
 						// 设置当前人的缴纳的定金总额.
 						connection.hSet(RedisColumn.peopleToRechargeMoney(),
 								(p.getPeopleSno() + "").getBytes(), sum);
@@ -307,7 +313,8 @@ public class DinnerImpl implements IDinner {
 						connection.zIncrBy(RedisColumn.orderPeopleWithScore(),
 								-1, (peopleId + "").getBytes());
 						connection.del(RedisColumn.orderSingle(val));
-						connection.sRem(RedisColumn.groupToOrder(groupSno),(val + "").getBytes());
+						connection.sRem(RedisColumn.groupToOrder(groupSno),
+								(val + "").getBytes());
 						connection.del(RedisColumn.orderTime(val));
 						connection.sRem(RedisColumn.peopleToOrder(peopleId),
 								(val + "").getBytes());
@@ -339,6 +346,14 @@ public class DinnerImpl implements IDinner {
 		final int groupSno = Integer.parseInt(tool.getKey(RedisColumn
 				.rechargeGroup(val)));
 		final String time = tool.getKey(RedisColumn.rechargeTime(val));
+		double money = Double.parseDouble(tool.getKey(RedisColumn.rechargeMoney(val)));
+		byte[] m = tool.getHashByKey(RedisColumn.peopleToRechargeMoney(),
+				(people+ "").getBytes());
+		final byte[] sum;		 
+		double d = Double.parseDouble(new String(m));
+		d -= money;
+		sum = (d + "").getBytes();
+		 
 		SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -353,10 +368,13 @@ public class DinnerImpl implements IDinner {
 						connection.del(RedisColumn.rechargeMoney(val));
 						connection.del(RedisColumn.rechargeTime(val));
 						connection.del(RedisColumn.rechargeGroup(val));
-						connection.sRem(RedisColumn.groupToRecharge(groupSno),(val + "").getBytes());
+						connection.sRem(RedisColumn.groupToRecharge(groupSno),
+								(val + "").getBytes());
 						// 添加人员到充值记录的映射
 						connection.sRem(RedisColumn.peopleToRecharge(people),
 								(val + "").getBytes());
+						connection.hSet(RedisColumn.peopleToRechargeMoney(),
+								(people + "").getBytes(), sum);
 						connection.sRem(RedisColumn.timeToRecharge(time),
 								(val + "").getBytes());
 						connection.sRem(RedisColumn.rechargeList(),
@@ -480,10 +498,10 @@ public class DinnerImpl implements IDinner {
 	}
 
 	@Override
-	public List<Dinner> getDinnersByRank() {
+	public List<Dinner> getDinnersByRank(int top) {
 		List<Dinner> result = new ArrayList<Dinner>();
-		Set<Tuple> s = tool
-				.getListWithScore(RedisColumn.orderDinnerWithScore());
+		Set<Tuple> s = tool.getListWithScore(
+				RedisColumn.orderDinnerWithScore(), top);
 		Iterator<Tuple> itt = s.iterator();
 		while (itt.hasNext()) {
 			Tuple tt = itt.next();
@@ -578,14 +596,15 @@ public class DinnerImpl implements IDinner {
 	public int login(Login param) {
 		if (param.getSno() == -1) {
 			return regiest(param);
-		}else{
+		} else {
 			int userId = param.getSno();
-			if(param.getPass().equals(tool.getKey(RedisColumn.loginPass(userId)))){
+			if (param.getPass().equals(
+					tool.getKey(RedisColumn.loginPass(userId)))) {
 				return param.getSno();
-			}else{
+			} else {
 				return -1;
 			}
-		} 
+		}
 	}
 
 	@Override
@@ -623,8 +642,8 @@ public class DinnerImpl implements IDinner {
 	@Override
 	public Login getLoginById(int tim) {
 		Login p = new Login();
-		p.setGroupName(tool.getKey(RedisColumn.loginGroupName(tim))) ;
-		p.setSno(tim); 
+		p.setGroupName(tool.getKey(RedisColumn.loginGroupName(tim)));
+		p.setSno(tim);
 		return p;
 	}
 
@@ -633,7 +652,7 @@ public class DinnerImpl implements IDinner {
 		Set<byte[]> ll = tool.getSet(RedisColumn.login());
 		List<Login> result = new ArrayList<Login>();
 		for (Object o : ll) {
-			int key = Integer.parseInt(new String((byte[]) o)); 
+			int key = Integer.parseInt(new String((byte[]) o));
 			result.add(getLoginById(key));
 		}
 		return result;
@@ -650,8 +669,7 @@ public class DinnerImpl implements IDinner {
 					throws DataAccessException {
 				// 保存在一个交集中.
 				connection.sInterStore(RedisColumn.groupAndTimeToOrder(p, t),
-						RedisColumn.groupToOrder(p),
-						RedisColumn.timeToOrder(t));
+						RedisColumn.groupToOrder(p), RedisColumn.timeToOrder(t));
 				return null;
 			}
 
@@ -668,13 +686,126 @@ public class DinnerImpl implements IDinner {
 
 	@Override
 	public List<String> getRechargeByGroup(int group) {
-		Set<byte[]> thisGroupRecharge = tool.getSet(RedisColumn.groupToRecharge(group));
+		Set<byte[]> thisGroupRecharge = tool.getSet(RedisColumn
+				.groupToRecharge(group));
 		List<String> result = new ArrayList<String>();
 		Iterator<byte[]> it = thisGroupRecharge.iterator();
 		while (it.hasNext()) {
 			result.add(new String(it.next()));
 		}
 		return result;
+	}
+
+	@Override
+	public void saveArg(String time, double money, int groupSno) {
+		final int g = groupSno;
+		final String t = time;
+		final String m = money + "";
+		// 得到当天的全部订单
+		List<String> orders = getOrderByGroupAndDay(groupSno, time);
+		final List<Order> _ods = new ArrayList<Order>();
+		for (String _o : orders) {
+			Order oo = new Order();
+			oo.setSno(Integer.parseInt(_o));
+			oo.setIsSingle(tool.getKey(RedisColumn.orderSingle(Integer
+					.parseInt(_o))));
+			oo.setMoney(tool.getKey(RedisColumn.orderMoney(Integer.parseInt(_o))));
+			_ods.add(oo);
+		}
+		SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public Integer execute(RedisOperations operations)
+					throws DataAccessException {
+				operations.multi();
+				operations.execute(new RedisCallback() {
+
+					@Override
+					public Object doInRedis(RedisConnection connection)
+							throws DataAccessException {
+						connection.set(RedisColumn.timeAndGroupToAvg(t, g),
+								m.getBytes());
+						// 设置全部的当天的消费值.
+						for (Order o : _ods) {
+							// 如果不是单点，该订单的消费额就是平均值.
+							if ("0".equals(o.getIsSingle()))
+								connection.set(
+										RedisColumn.orderCost(o.getSno()),
+										m.getBytes());
+							else {
+								// 单点的话消费额就是该订单的金额，而不是平均值.
+								connection.set(
+										RedisColumn.orderCost(o.getSno()), o
+												.getMoney().getBytes());
+							}
+						}
+						return null;
+					}
+
+				});
+				operations.exec();
+				return null;
+			}
+		};
+		tool.getTemplate().execute(sessionCallback);
+	}
+
+	@Override
+	public List<People> getPeopleByCostsRank(final int group) {
+		Set<byte[]> allPeoples = tool.getSet(RedisColumn.groupToPeople(group));
+		List<People> result = new ArrayList<People>();
+		for (byte[] p : allPeoples) { 
+			Set<byte[]> orders = getOrderByGroupAndPeople(group,Integer.parseInt(new String(p)));
+			People _p = new People();
+			_p.setSno(Integer.parseInt(new String(p)));
+			_p.setName(tool.getKey(RedisColumn.peopleName(_p.getSno())));
+			double sum = 0;
+			for (byte[] o:orders){
+				String cost = tool.getKey(RedisColumn.orderCost(Integer.parseInt(new String(o))));
+				String cost2 = tool.getKey(RedisColumn.orderMoney(Integer.parseInt(new String(o))));
+				//如果没有设置平均消费，就从实际点餐金额中计算.
+				if(cost!=null)
+					sum+=Double.parseDouble(cost);
+				else
+					sum+=Double.parseDouble(cost2);
+			}
+			_p.setRechargeSum(sum);
+			result.add(_p);
+		}
+		Collections.sort(result);
+		return result;
+	}
+
+	@Override
+	public List<People> getPeopleByGroup(int groupSno) {
+		Set<byte[]> allPeoples = tool.getSet(RedisColumn.groupToPeople(groupSno));
+		List<People> result = new ArrayList<People>();
+		for (byte[] p : allPeoples) { 
+			 People _p = new People();
+			_p.setSno(Integer.parseInt(new String(p)));
+			_p.setName(tool.getKey(RedisColumn.peopleName(_p.getSno()))); 
+			result.add(_p);
+		} 
+		return result;
+	}
+
+	@Override
+	public Set<byte[]> getOrderByGroupAndPeople(int groupSno, int people) {
+		final int g = groupSno;
+		final int p = people;
+		// 添加一个交集.
+		tool.getTemplate().execute(new RedisCallback() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				// 保存在一个交集中.
+				connection.sInterStore(RedisColumn.groupAndPeopleToOrder(g, p),
+						RedisColumn.groupToOrder(g),
+						RedisColumn.peopleToOrder(p));
+				return null;
+			}
+		});
+		return tool.getSet(RedisColumn.groupAndPeopleToOrder(g, p));
 	}
 
 }

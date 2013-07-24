@@ -133,20 +133,23 @@ public class DinnerAction {
 	}
 
 	public String init() {
-		List<People> peoples = dinner.getPeoples();
+		HttpServletRequest request = ServletActionContext.getRequest();
+		String groupSno = "" + request.getSession().getAttribute("groupSno");
+		if (groupSno != null && !"null".equals(groupSno)) {
+			List<People> peoples = dinner.getPeopleByGroup(Integer.parseInt(groupSno));
+			request.setAttribute("peoples", peoples);
+		}
 		List<String> allTime = dinner.getOrderTimeSet();
 		List<Order> orders = dinner.getOrders();
 		List<Dinner> dinners = dinner.getDinners();
 		List<Menu> menus = dinner.getMenus();
 		List<ReCharge> rechargs = dinner.getRecharges();
-		HttpServletRequest request = ServletActionContext.getRequest();
 		request.setAttribute("menus", menus);
 		request.setAttribute("rechargs", rechargs);
-		request.setAttribute("peoples", peoples);
 		request.setAttribute("orders", orders);
 		request.setAttribute("dinners", dinners);
 		request.setAttribute("allTime", allTime);
-		return "dinner";
+		return "dinner";  
 	}
 
 	private String groupSno;
@@ -223,6 +226,19 @@ public class DinnerAction {
 		}
 		return null;
 	}
+	
+	public String setAvg() { 
+		dinner.saveArg(moneyTime,Double.parseDouble(money),Integer.parseInt(groupSno));
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			response.setContentType("text/html;charset=GBK");
+			response.getWriter().write("保存成功!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 
 	/**
 	 * 根据充值金额排序的人员清单.
@@ -236,14 +252,23 @@ public class DinnerAction {
 		request.setAttribute("title", "充值金额统计排行榜");
 		return "newTable";
 	} 
-
+	
+	public String peopleByCostMoneyRank() {
+		HttpServletRequest request = ServletActionContext.getRequest();
+		String groupSno = "" + request.getSession().getAttribute("groupSno"); 
+		List<People> p = dinner.getPeopleByCostsRank(Integer.parseInt(groupSno)); 
+		request.setAttribute("rankPeople", p);
+		request.setAttribute("title", "消费金额统计排行榜");
+		return "newTable";
+	} 
+	  
 	/**
 	 * 根据菜名的订单数的清单.
 	 * 
 	 * @return
 	 */
 	public String dinnerRank() {
-		List<Dinner> p = dinner.getDinnersByRank();
+		List<Dinner> p = dinner.getDinnersByRank(10);
 		HttpServletRequest request = ServletActionContext.getRequest();
 		request.setAttribute("rankDinner", p);
 		request.setAttribute("title", "大家最喜欢订餐排行榜");

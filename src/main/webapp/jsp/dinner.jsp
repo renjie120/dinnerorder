@@ -50,6 +50,7 @@
 	$(document).ready(function(){
 		<%if (userId == null || "-1".equals(userId + "")) {%>
 			$('img[tag!=1]').remove();
+			$('.set').remove();
 		<%}%>
 		if ($('#gName').text() == 'null') {
 			$('img[tag!=1]').remove();
@@ -219,12 +220,32 @@
 	}
 
 	function goUrl(sno) {
-		window
-				.open(
+		window.open(
 						'dinner!goUrl.action?id=' + sno,
 						'newwindow',
-						'height=500, width=400, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no');
+						'height=500, width=400, top=0, left=0, toolbar=no, menubar=no, scrollbars=auto,resizable=no,location=no, status=no');
 		location.reload();
+	}
+	function setAvg(obj,t,gSno){
+		var v = $(obj).prev().val();
+		if(isNaN(v)){
+			alert('必须输入数字类型');
+			return false;
+		}
+		var p = []; 
+		var param = p.join('&');
+		$.ajax({
+			url : "dinner!setAvg.action",
+			data : "money="+v+"&moneyTime="+t+"&groupSno="+gSno,
+			type : 'POST',
+			dataType : 'json',
+			success : function(x) {
+				alert(x); 
+			},
+			error : function(x, textStatus, errorThrown) {
+				alert(x.responseText); 
+			}
+		});
 	}
 	function saveMenu() {
 		var p = [];
@@ -250,8 +271,7 @@
 				alert(x.responseText);
 				location.reload();
 				$('#menuName').val('');
-				$('#menuName').va
-l('');
+				$('#menuName').val('');
 			}
 		});
 	}
@@ -293,6 +313,13 @@ input {
 	border: 1px solid black;
 }
 
+.set {
+	background: url(./jsp/bg.gif) no-repeat -333px -76px;
+	display:inline-block; *display:inline; *zoom:1;
+	width: 18px;
+	height: 21px;
+}
+
 a {
 	font-size: 12px;
 }
@@ -303,6 +330,9 @@ a {
 	<h1>
 		<font color="red">当前分组：<label id="gName"><%=groupName%></label></font>
 	</h1>
+	<%if(groupName==null||"null".equals(groupName)){ %>
+		<a href="<%=basePath%>"><font size="12">请从首页登录</font></a>
+	<%} %>
 	<input id="groupSno" type="hidden" value="<%=groupSno%>">
 	<table>
 		<tr>
@@ -324,6 +354,7 @@ a {
 									<td><input id='peopleName' /> <select id='peopleList'>
 											<option value="-1">请选择</option>
 											<%
+											if(ps!=null&&ps.size()>0)
 												for (People p : ps) {
 											%>
 											<option value="<%=p.getSno()%>"><%=p.getName()%></option>
@@ -364,6 +395,10 @@ a {
 								</tr>
 							</table>
 						</td>
+						
+						<% 
+							if (!(userId == null || "-1".equals(userId + ""))) {
+						%>
 						<td>
 							<table>
 								<tr>
@@ -382,6 +417,7 @@ a {
 									<td><select id='rechargePeopleList'>
 											<option value="-1">请选择</option>
 											<%
+											if(ps!=null&&ps.size()>0)
 												for (People p : ps) {
 											%>
 											<option value="<%=p.getSno()%>"><%=p.getName()%></option>
@@ -401,9 +437,6 @@ a {
 								</tr>
 							</table>
 						</td>
-						<%
-							if (!(userId == null || "null".equals(userId + ""))) {
-						%>
 						<td>
 							<table>
 								<tr>
@@ -423,8 +456,7 @@ a {
 							</table>
 						</td>
 						<%
-							}
-						%>
+							}%>
 						<td>
 							<table>
 								<tr>
@@ -466,6 +498,7 @@ a {
 					</tr>
 					<tr>
 						<td>时间</td>
+						<td>人均</td>
 						<%
 							Iterator<Tuple> itt = peopleSet.iterator();
 							while (itt.hasNext()) {
@@ -478,10 +511,8 @@ a {
 						<td><%=tool.getKey(RedisColumn.peopleName(_pid))%></td>
 						<%
 							}
-						%>
-
-					</tr>
-
+						%> 
+					</tr> 
 					<%
 						//打印出来每一天的订餐的情况
 						for (String t : allTime) {
@@ -495,6 +526,7 @@ a {
 					%>
 					<tr>
 						<td><%=t + "(" + dinner.getSumByDay(t) + ")"%></td>
+						<td><input id="avg" style="width:30px" value="<%=tool.getKey(RedisColumn.timeAndGroupToAvg(t, Integer.parseInt(groupSno)))%>"/><a class="set" onclick="javascript:setAvg(this,'<%=t%>','<%=groupSno%>')" /></a></td>
 						<%
 							//按照订餐人数的次数优先级显示出来全部的人员.
 								Iterator<Tuple> it2 = peopleSet.iterator();

@@ -14,16 +14,21 @@ public class RedisColumn {
 	public final static String ORDER_MONEY = "money";
 	public final static String ORDER_PEOPLE = "people";
 	public final static String ORDER_SNO = "sno";
+	public final static String ORDER_COST = "cost";
 	public final static String ORDER_SINGLE = "single";
 	public final static String ORDER_GROUP = "group";
 	public final static String ORDER_DINNER = "dinner";
 	public final static String ORDER_LIST = "all_sno";
 	public final static String PEOPLE_TO_ORDER = "peopleToOrder";
 	public final static String PEOPLE_AND_TIME_TO_ORDER = "peopleAndTimeToOrder";
+	public final static String PEOPLE_TO_COSTSUM = "peopleToCostSum";
 	public final static String TIME_TO_ORDER = "timeToOrder";
+	public final static String TIMEANDGROUP_TO_AVG = "timeAndGroupToAvg";
 	public final static String ORDER_TO_TIME = "orderToTime";
 	public final static String GROUP_TO_ORDER = "groupToOrder";
+	public final static String GROUP_TO_PEOPLE = "groupToPeople";
 	public final static String GROUP_AND_TIME_TO_ORDER = "groupAndTimeToOrder";
+	public final static String GROUP_AND_PEOPLE_TO_ORDER = "groupAndPeopleToOrder";
 	public final static String ORDER_PEOPLE_WITH_SCORE = "peopleWithScore";
 	public final static String ORDER_DINNER_WITH_SCORE = "dinnerWithScore";
 	public final static String ORDER_TIME_SET = "order_times_set";
@@ -39,7 +44,7 @@ public class RedisColumn {
 		}
 		System.out.println(System.currentTimeMillis() - start);
 	}
- 
+
 	public static byte[] order() {
 		return new Key(SYSTEM).add(ORDER_PRE).getId();
 	}
@@ -52,14 +57,35 @@ public class RedisColumn {
 		return new Key(SYSTEM).add(ORDER_PRE).add(people).add(time)
 				.add(PEOPLE_AND_TIME_TO_ORDER).getId();
 	}
+	 
+
+	public static byte[] peopleToCostSum(int people) {
+		return new Key(SYSTEM).add(ORDER_PRE).add(people)
+				.add(PEOPLE_TO_COSTSUM).getId();
+	}
+
+	public static byte[] timeAndGroupToAvg(String time, int group) {
+		return new Key(SYSTEM).add(ORDER_PRE).add(time).add(group)
+				.add(TIMEANDGROUP_TO_AVG).getId();
+	}
 
 	public static byte[] groupAndTimeToOrder(int group, String time) {
 		return new Key(SYSTEM).add(ORDER_PRE).add(group).add(time)
 				.add(GROUP_AND_TIME_TO_ORDER).getId();
 	}
+	
+	public static byte[] groupAndPeopleToOrder(int group, int people) {
+		return new Key(SYSTEM).add(ORDER_PRE).add(group).add(people)
+				.add(GROUP_AND_PEOPLE_TO_ORDER).getId();
+	}
+
 
 	public static byte[] orderTime(int sno) {
 		return new Key(SYSTEM).add(ORDER_PRE).add(sno).add(ORDER_TIME).getId();
+	}
+	
+	public static byte[] orderCost(int sno) {
+		return new Key(SYSTEM).add(ORDER_PRE).add(sno).add(ORDER_COST).getId();
 	}
 
 	public static byte[] orderGroup(int sno) {
@@ -95,7 +121,7 @@ public class RedisColumn {
 	 */
 	public static byte[] peopleToOrder(int people) {
 		return new Key(SYSTEM).add(ORDER_PRE).add(people)
-				.add(ORDER_DINNER_WITH_SCORE).getId();
+				.add(PEOPLE_TO_ORDER).getId();
 	}
 
 	/**
@@ -108,6 +134,17 @@ public class RedisColumn {
 		return new Key(SYSTEM).add(ORDER_PRE).add(groupSno).add(GROUP_TO_ORDER)
 				.getId();
 	}
+	
+	/**
+	 * 分组对应的人员.
+	 * @param groupSno
+	 * @return
+	 */
+	public static byte[] groupToPeople(int groupSno) {
+		return new Key(SYSTEM).add(ORDER_PRE).add(groupSno).add(GROUP_TO_PEOPLE)
+				.getId();
+	}
+
 
 	/**
 	 * 时间对应的全部订单号.

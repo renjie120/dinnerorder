@@ -120,6 +120,7 @@ public class RedisManagerAction {
 	}
 
 	/**
+	 * 
 	 * 判断是否存在一个指定的key.
 	 * 
 	 * @return

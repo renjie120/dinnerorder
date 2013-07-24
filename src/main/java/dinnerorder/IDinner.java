@@ -23,6 +23,15 @@ public interface IDinner {
 	 * @return
 	 */
 	public int saveMenu(Menu order);
+	
+	/**
+	 * 设置平均值.
+	 * @param time
+	 * @param money
+	 * @param groupSno
+	 * @return
+	 */
+	public void saveArg(String time,double money,int groupSno);
 
 	/**
 	 * 返回全部的菜单.
@@ -105,6 +114,14 @@ public interface IDinner {
 	public List<String> getOrderByGroupAndDay(int groupSno,String time);
 
 	/**
+	 * 得到一个小组里面的人员的指定订单.
+	 * @param groupSno
+	 * @param people
+	 * @return
+	 */
+	public Set<byte[]> getOrderByGroupAndPeople(int groupSno,int people);
+ 
+	/**
 	 * 返回订单记录.
 	 * @return
 	 */
@@ -153,14 +170,28 @@ public interface IDinner {
 	 * 得到点菜数量排行榜
 	 * @return
 	 */
-	public List<Dinner> getDinnersByRank(); 
+	public List<Dinner> getDinnersByRank(int top); 
 	
 	/**
 	 * 得到人员的充值记录排行榜.
 	 * @return
 	 */
 	public List<People> getPeopleByRechargesRank(); 
-	  
+	
+	/**
+	 * 人员消费排行榜
+	 * @return
+	 */
+	public List<People> getPeopleByCostsRank(int groupSno); 
+	
+	/**
+	 * 返回一个分组里面的全部人员.
+	 * @param groupSno
+	 * @return
+	 */
+	public List<People> getPeopleByGroup(int groupSno); 
+	
+	
 	/**
 	 * 得到某天的订餐金额总量.
 	 * @param tim

@@ -77,6 +77,23 @@ public class BaseRedisTool {
 			}
 		});
 	}
+	
+	/**
+	 * 返回指定排名的元素
+	 * @param k
+	 * @param top
+	 * @return
+	 */
+	public Set<Tuple> getListWithScore(final byte[] k,final int top) {
+		return template.execute(new RedisCallback<Set<Tuple>>() {
+			@Override
+			public Set<Tuple> doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				Set<Tuple> r = connection.zRevRangeWithScores(k, 0, top);
+				return r;
+			}
+		});
+	}
 
 	/**
 	 * 返回一个map对应的全部的值.
