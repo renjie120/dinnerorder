@@ -77,14 +77,15 @@ public class BaseRedisTool {
 			}
 		});
 	}
-	
+
 	/**
 	 * 返回指定排名的元素
+	 * 
 	 * @param k
 	 * @param top
 	 * @return
 	 */
-	public Set<Tuple> getListWithScore(final byte[] k,final int top) {
+	public Set<Tuple> getListWithScore(final byte[] k, final int top) {
 		return template.execute(new RedisCallback<Set<Tuple>>() {
 			@Override
 			public Set<Tuple> doInRedis(RedisConnection connection)
@@ -630,5 +631,121 @@ public class BaseRedisTool {
 			}
 
 		});
+	}
+
+	private boolean isEmpty(String str) {
+		return str == null || "".equals(str.trim())
+				|| "null".equals(str.trim());
+	}
+
+	public int regiest(final String system, final String tableName,
+			final String column, final String formater, final String desc) {
+		final int val = generateKey(RedisColumn.snoFactory());
+		// 添加系统级别主键.
+		if (isEmpty(tableName)) {
+			SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
+				@Override
+				public Integer execute(RedisOperations operations)
+						throws DataAccessException {
+					operations.multi();
+					operations.execute(new CopyOfBaseRedisTool(val, system,
+							desc));
+					operations.exec();
+					return null;
+				}
+			};
+			getTemplate().execute(sessionCallback);
+			return val;
+		}
+		// 添加表名级别
+		else if (isEmpty(column)) {
+			final int systemId = Integer.parseInt(system);
+			SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
+				@Override
+				public Integer execute(RedisOperations operations)
+						throws DataAccessException {
+					operations.multi();
+					operations.execute(new RedisCallback() {
+						@Override
+						public Object doInRedis(RedisConnection connection)
+								throws DataAccessException {
+							connection.set((val + "").getBytes(),
+									tableName.getBytes());
+							connection.set(RegisterSystem.desc(val),
+									desc.getBytes());
+							connection.lPush(RegisterSystem.system(systemId),
+									(val + "").getBytes());
+							return null;
+						}
+
+					});
+					operations.exec();
+					return null;
+				}
+			};
+			getTemplate().execute(sessionCallback);
+			return val;
+		}
+		// 添加列标题级别
+		else if (isEmpty(formater)) {
+			final int systemId = Integer.parseInt(system);
+			final int tableId = Integer.parseInt(tableName);
+			SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
+				@Override
+				public Integer execute(RedisOperations operations)
+						throws DataAccessException {
+					operations.multi();
+					operations.execute(new RedisCallback() {
+						@Override
+						public Object doInRedis(RedisConnection connection)
+								throws DataAccessException {
+							connection.set((val + "").getBytes(),
+									column.getBytes());
+							connection.set(RegisterSystem.desc(val),
+									desc.getBytes());
+							connection.lPush(
+									RegisterSystem.table(systemId, tableId),
+									(val + "").getBytes());
+							return null;
+						}
+
+					});
+					operations.exec();
+					return null;
+				}
+			};
+			getTemplate().execute(sessionCallback);
+			return val;
+		} else if (!isEmpty(formater)) {
+			final int systemId = Integer.parseInt(system);
+			final int tableId = Integer.parseInt(tableName);
+			final int columnId = Integer.parseInt(column);
+			SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
+				@Override
+				public Integer execute(RedisOperations operations)
+						throws DataAccessException {
+					operations.multi();
+					operations.execute(new RedisCallback() {
+						@Override
+						public Object doInRedis(RedisConnection connection)
+								throws DataAccessException {
+							connection.set((val + "").getBytes(),
+									formater.getBytes());
+							connection.set(RegisterSystem.desc(val),
+									desc.getBytes());
+							connection.lPush(RegisterSystem.column(systemId,
+									tableId, columnId), (val + "").getBytes());
+							return null;
+						}
+
+					});
+					operations.exec();
+					return null;
+				}
+			};
+			getTemplate().execute(sessionCallback);
+			return val;
+		}
+		return -1;
 	}
 }

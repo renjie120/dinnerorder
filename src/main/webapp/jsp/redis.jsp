@@ -208,7 +208,7 @@
 	}
 	function deletethis(obj) {
 		if (confirm('确定删除么?')) {
-			var v = $(obj).parent().prev().html();
+			var v = $(obj).parent().prev().find('span').html(); 
 			$.ajax({
 				url : "redisManager!deleteKey.action",
 				data : "keys=" + v,
@@ -298,44 +298,114 @@
 	}
 
 	function addSystem(obj) {
-		var v = $(obj).prev().val();
-		var v2 = $(obj).prev().val();
-		if (v == '') {
+		var _s = $(obj).parent().find('#registerSystem');
+		var system = _s.val(); 
+		var desc = $(obj).prev().val();
+		if (system == '') {
 			alert('必填！');
 			return false;
 		}
 		$.ajax({
-			url : "redisManager!addSystem.action",
-			data : "value=" + v,
+			url : "redisManager!regiest.action",
+			data : "system=" + system+"&desc="+desc,
 			type : "post",
 			success : function(d) {
-
+				eval("var _d = "+d);
+				if(_d.result==1){
+					$('select[name=system]').append("<option value='"+_d.code+"'>"+system+"</option>");
+					_s.val('');
+					$(obj).prev().val('');
+				}else{
+					alert('添加失败!');
+				}
 			}
 		});
 	}
 
 	function addTable(obj) {
-		var v = $(obj).prev().html();
-		if (v == '') {
+		var _s = $(obj).parent().find('#registerTable');
+		var tbname = _s.val(); 
+		var desc = $(obj).prev().val(); 
+		var  system=  $(obj).parent().find('#sel1').val();
+		if (tbname == ''||system=='-1') {
 			alert('必填！');
 			return false;
 		}
 		$.ajax({
-			url : "redisManager!addTable.action",
-			data : "value=" + v,
+			url : "redisManager!regiest.action",
+			data : "system=" + system+"&tbname="+tbname+"&desc="+desc,
 			type : "post",
 			success : function(d) {
-				$(obj).parent().parent().remove();
+				eval("var _d = "+d);
+				if(_d.result==1){
+					$('select[name=table]').append("<option value='"+_d.code+"'>"+tbname+"</option>");
+					_s.val('');
+					$(obj).prev().val('');
+					 $(obj).parent().find('#sel1').val('-1');
+				}else{
+					alert('添加失败!');
+				}
 			}
 		});
 	}
 
 	function addColumn(obj) {
-		alert(this);
+		var _s = $(obj).parent().find('#registerColumn');
+		var columnName = _s.val(); 
+		var desc = $(obj).prev().val();  
+		var  system=  $(obj).parent().find('#sel2').val();
+		var  tbname=  $(obj).parent().find('#sel3').val();
+		if (columnName == ''||system=='-1'||tbname=='-1') {
+			alert('必填！');
+			return false;
+		}
+		$.ajax({
+			url : "redisManager!regiest.action",
+			data : "system=" + system+"&tbname="+tbname+"&columnName="+columnName+"&desc="+desc,
+			type : "post",
+			success : function(d) {
+				eval("var _d = "+d);
+				if(_d.result==1){
+					$('select[name=column]').append("<option value='"+_d.code+"'>"+columnName+"</option>");
+					_s.val('');
+					$(obj).prev().val('');
+					$(obj).parent().find('#sel2').val(-1);
+					$(obj).parent().find('#sel3').val(-1);
+				}else{
+					alert('添加失败!');
+				}
+			}
+		});
 	}
 
 	function addFormater(obj) {
-		alert(this);
+		var _s = $(obj).parent().find('#registerFormater');
+		var formater = _s.val(); 
+		var desc = $(obj).prev().val(); 
+		var  system=  $(obj).parent().find('#sel4').val();
+		var  tbname=  $(obj).parent().find('#sel5').val();
+		var  columnName=  $(obj).parent().find('#sel6').val();  
+		if (formater == ''||columnName == '-1'||system=='-1'||tbname=='-1') {
+			alert('必填！');
+			return false;
+		}
+		$.ajax({
+			url : "redisManager!regiest.action",
+			data : "system=" + system+"&tbname="+tbname+"&columnName="+columnName+"&formater="+formater+"&desc="+desc,
+			type : "post",
+			success : function(d) {
+				eval("var _d = "+d);
+				if(_d.result==1){
+					_s.val('');
+					$(obj).prev().val('');
+					$(obj).parent().find('#sel4').val(-1);
+					$(obj).parent().find('#sel5').val(-1);
+					$(obj).parent().find('#sel6').val(-1);
+				}else{
+					alert('添加失败!');
+				}
+			}
+		});
 	}
 
 	function addMore() {
@@ -398,18 +468,18 @@
 	<table id='regiestTable'>
 		<tr>
 			<td>系统名</td>
-			<td><input id="registerSystem" /><span class="set" onClick="addSystem(this)"></span></td>
+			<td><input id="registerSystem" /><span>描述:</span><input id="desc" /><span class="set" onClick="addSystem(this)"></span></td>
 		</tr>
 		<tr>
 			<td>表名</td>
 			<td><select name="system" id="sel1"><option value="-1">请选择系统</option></select>
-				<input id="registerTable" /><span class="set" onclick="addTable(this)"></span></td>
+				<input id="registerTable" />描述:<input id="desc" /><span class="set" onclick="addTable(this)"></span></td>
 		</tr>
 		<tr>
 			<td>列名</td>
 			<td><select id="sel2" name="system"><option value="-1">请选择系统</option></select>
 				<select id="sel3" name="table"><option value="-1">请选择表名</option></select>
-				<input id="registerColumn" /> <span class="set"
+				<input id="registerColumn" /> 描述:<input id="desc" /><span class="set"
 				onclick="addColumn(this)"></span></td>
 		</tr>
 		<tr>
@@ -417,7 +487,7 @@
 			<td><select id="sel4" name="system"><option value="-1">请选择系统</option></select>
 				<select name="table" id="sel5"><option value="-1">请选择表名</option></select>
 				<select name="column" id="sel6"><option value="-1">请选择列名</option></select>
-				列格式<input id="registerFormater" /> <span class="set"
+				列格式<input id="registerFormater" /> 描述:<input id="desc" /><span class="set"
 				onclick="addFormater(this)"></span> 添加更多：<span class="open"
 				onclick="addMore()"></span></td>
 		</tr>

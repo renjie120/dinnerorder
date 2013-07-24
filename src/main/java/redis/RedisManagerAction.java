@@ -227,4 +227,69 @@ public class RedisManagerAction {
 		write(build.toString());
 		return null;
 	}
+	
+	private String system;
+	private String columnName;
+	private String tbname;
+	private String formater;
+
+	public String getSystem() {
+		return system;
+	}
+
+	public void setSystem(String system) {
+		this.system = system;
+	}
+
+	public String getColumnName() {
+		return columnName;
+	}
+
+	public void setColumnName(String columnName) {
+		this.columnName = columnName;
+	}
+
+	public String getTbname() {
+		return tbname;
+	}
+
+	public void setTbname(String tbname) {
+		this.tbname = tbname;
+	}
+
+	public String getFormater() {
+		return formater;
+	}
+
+	public void setFormater(String formater) {
+		this.formater = formater;
+	} 
+	private String desc;
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+
+	public String regiest() {
+		HttpServletResponse response = ServletActionContext.getResponse();
+		response.setContentType("text/html;charset=GBK");
+		try { 
+			int code = redisTool.regiest(system,columnName,tbname,formater,desc);
+			response.getWriter().print("{'result':1,'code':'"+code+"'}"); 
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				response.getWriter().print("{'result':0}");
+			} catch (IOException e1) { 
+				e1.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
 }
