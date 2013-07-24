@@ -343,11 +343,11 @@
 	<br>
 	<table id='addKeyTable'></table>
 	
-	
 	<hr> 
-	<button id="regist">注册表查询</button>
-	(对表结构定义查询)
+	<button id="regist">注册表结构</button>
+	(添加键的自动生成策略)
 	<br>
-	<table id='regiestTable'></table>
+	<table id='regiestTable'></table> 
+	
 </body>
 </html>
