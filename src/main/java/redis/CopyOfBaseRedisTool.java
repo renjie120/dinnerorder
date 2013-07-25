@@ -26,9 +26,7 @@ public class CopyOfBaseRedisTool implements RedisCallback {
 	@Override
 	public Object doInRedis(RedisConnection connection)
 			throws DataAccessException {
-		connection.set((val + "").getBytes(), system.getBytes());
-		connection.set(RegisterSystem.desc(val), desc.getBytes());
-		connection.lPush(RegisterSystem.regiest(), (val + "").getBytes());
+	
 		return null;
 	}
 

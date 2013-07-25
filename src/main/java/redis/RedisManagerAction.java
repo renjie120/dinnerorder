@@ -1,6 +1,7 @@
 package redis;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -8,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts2.ServletActionContext;
+
+import bean.Menu;
 
 /**
  * reids管理小工具.
@@ -25,6 +28,33 @@ public class RedisManagerAction {
 	private String config;
 	private String keys;
 	private String value;
+	private String systemId;
+	private String tableId;
+	private String columnId;
+
+	public String getSystemId() {
+		return systemId;
+	}
+
+	public void setSystemId(String systemId) {
+		this.systemId = systemId;
+	}
+
+	public String getTableId() {
+		return tableId;
+	}
+
+	public void setTableId(String tableId) {
+		this.tableId = tableId;
+	}
+
+	public String getColumnId() {
+		return columnId;
+	}
+
+	public void setColumnId(String columnId) {
+		this.columnId = columnId;
+	}
 
 	public String getValue() {
 		return value;
@@ -64,9 +94,60 @@ public class RedisManagerAction {
 		this.redisTool = redisTool;
 	}
 
+	private List<Menu> getMenus(byte[] by) {
+		List<Menu> all_system = new ArrayList<Menu>();
+		List<byte[]> allSystem = redisTool.getList(by);
+		for (byte[] b : allSystem) {
+			String desc = redisTool.getKey(RegisterSystem.desc(Integer
+					.parseInt(new String(b))));
+			Menu m = new Menu();
+			m.setSno(Integer.parseInt(new String(b)));
+			m.setMenuName(desc);
+			all_system.add(m);
+		}
+		return all_system;
+	}
+
+	private List<Menu> getAllTable(int systemId) {
+		return getMenus(RegisterSystem.system(systemId));
+	}
+
+	private List<Menu> getAllColumn(int systemId, int tableId) {
+		return getMenus(RegisterSystem.table(systemId, tableId));
+	}
+
+	private List<Menu> getAllSystem() {
+		return getMenus(RegisterSystem.regiest());
+	}
+
+	private String menuListToStr(List<Menu> mns) {
+		StringBuilder bui = new StringBuilder(100);
+		if (mns != null && mns.size() > 0)
+			for (Menu m : mns) {
+				bui.append("<option value='" + m.getSno() + "'>"
+						+ m.getMenuName() + "</option>");
+			}
+		return bui.toString();
+	}
+
+	public String getColumnByTable() {
+		List<Menu> allSystem = getAllColumn(Integer.parseInt(systemId),
+				Integer.parseInt(tableId));
+		write(menuListToStr(allSystem));
+		return null;
+	}
+
+	public String getTableBySystem() {
+		List<Menu> allTable = getAllTable(Integer.parseInt(systemId));
+		write(menuListToStr(allTable));
+		return null;
+	}
+
 	public String manager() {
+		List<Menu> allSystem = getAllSystem();
 		HttpServletRequest request = ServletActionContext.getRequest();
 		request.setAttribute("count", redisTool.dbSize());
+		request.setAttribute("allSystem", allSystem);
 		return "manager";
 	}
 
@@ -189,7 +270,7 @@ public class RedisManagerAction {
 		response.setContentType("text/html;charset=GBK");
 		try {
 			redisTool.addKey(keytype, newKeyName, val1, val2);
-			response.getWriter().print("添加值到" + newKeyName + "类型成功."); 
+			response.getWriter().print("添加值到" + newKeyName + "类型成功.");
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (Exception e) {
@@ -227,7 +308,7 @@ public class RedisManagerAction {
 		write(build.toString());
 		return null;
 	}
-	
+
 	private String system;
 	private String columnName;
 	private String tbname;
@@ -263,8 +344,10 @@ public class RedisManagerAction {
 
 	public void setFormater(String formater) {
 		this.formater = formater;
-	} 
+	}
+
 	private String desc;
+
 	public String getDesc() {
 		return desc;
 	}
@@ -273,23 +356,81 @@ public class RedisManagerAction {
 		this.desc = desc;
 	}
 
-	public String regiest() {
+	public String regiestSystem() {
 		HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("text/html;charset=GBK");
-		try { 
-			int code = redisTool.regiest(system,columnName,tbname,formater,desc);
-			response.getWriter().print("{'result':1,'code':'"+code+"'}"); 
+		try {
+			int code = redisTool.regiest(system, desc);
+			response.getWriter().print("{'result':1,'code':'" + code + "'}");
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 			try {
 				response.getWriter().print("{'result':0}");
-			} catch (IOException e1) { 
+			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 		}
 		return null;
 	}
-	
+
+	public String regiestTable() {
+		HttpServletResponse response = ServletActionContext.getResponse();
+		response.setContentType("text/html;charset=GBK");
+		try {
+			int code = redisTool.regiest(system, tbname, desc);
+			response.getWriter().print("{'result':1,'code':'" + code + "'}");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				response.getWriter().print("{'result':0}");
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	public String regiestColumn() {
+		HttpServletResponse response = ServletActionContext.getResponse();
+		response.setContentType("text/html;charset=GBK");
+		try {
+			int code = redisTool.regiest(system, tbname, columnName, desc);
+			response.getWriter().print("{'result':1,'code':'" + code + "'}");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				response.getWriter().print("{'result':0}");
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	public String regiestFormat() {
+		HttpServletResponse response = ServletActionContext.getResponse();
+		response.setContentType("text/html;charset=GBK");
+		try {
+			int code = redisTool.regiest(system, tbname, columnName, formater,
+					desc);
+			response.getWriter().print("{'result':1,'code':'" + code + "'}");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				response.getWriter().print("{'result':0}");
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return null;
+	}
+
 }
