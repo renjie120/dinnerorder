@@ -60,7 +60,37 @@
 	font-size: 14px;
 	color: red;
 	font-weight: bold;
+}  
+td {
+	height: 22px;
+	border-bottom: 1px solid black;
+	border-right: 1px solid black;
+	cursor: default;
 }
+
+th {
+	height: 20px;
+	font-size: 12px;
+	font-weight: normal;
+	border-bottom: 2px solid black;
+	border-right: 1px solid black;
+	background-color: #999999
+}
+
+table {
+	font-size: 13px;
+	border-color: #ff6600;
+	bg-color: #FFD2D2;
+	cell-spacing: 0;
+	cell-padding: 0;
+	align: center;
+	border: 1;
+}
+
+input {
+	border: 1px solid black;
+}
+ 
 </style>
 <%
 	List<Menu> allSystem = (List<Menu>) request
@@ -117,8 +147,7 @@
 	<table id='addKeyTable'></table>
 
 	<hr>
-	<button id="regist">注册表结构</button>
-	(添加键的自动生成策略)
+ 	维护注册表结构(添加键的自动生成策略) 
 	<br>
 	<table id='regiestTable'>
 		<tr>
@@ -133,7 +162,7 @@
 						if (allSystem != null && allSystem.size() > 0) {
 							for (Menu m : allSystem) {
 					%>
-					<option value="<%=m.getSno()%>"> <%=m.getMenuName()%></option>
+					<option value="<%=m.getSno()%>" code="<%=m.getMenuUrl()%>"> <%=m.getMenuName()%></option>
 					<%
 						}
 						}
@@ -148,7 +177,7 @@
 						if (allSystem != null && allSystem.size() > 0) {
 							for (Menu m : allSystem) {
 					%>
-					<option value="<%=m.getSno()%>"><%=m.getMenuName()%></option>
+					<option value="<%=m.getSno()%>" code="<%=m.getMenuUrl()%>"><%=m.getMenuName()%></option>
 					<%
 						}
 						}
@@ -163,17 +192,18 @@
 						if (allSystem != null && allSystem.size() > 0) {
 							for (Menu m : allSystem) {
 					%>
-					<option value="<%=m.getSno()%>"><%=m.getMenuName()%></option>
+					<option value="<%=m.getSno()%>" code="<%=m.getMenuUrl()%>"><%=m.getMenuName()%></option>
 					<%
 						}
 						}
 					%></select>
 				<select name="table" id="sel5" onchange="changeTable(this)"><option
-						value="-1">请选择表名</option></select> <select name="column" id="sel6"><option
-						value="-1">请选择列名</option></select> 列格式<input id="registerFormater" /> 描述:<input
-				id="desc" /><span class="set" onclick="addFormater(this)"></span>
-				添加更多：<span class="open" onclick="addMore()"></span></td>
+						value="-1">请选择表名</option></select> <select name="column" id="sel6" onchange="changeColumn(this)"><option
+						value="-1">请选择列名</option></select> 列格式<input id="registerFormater" style="width:300px"/> 描述:<input
+				id="desc" /><span class="set" onclick="addFormater(this)"></span></td>
 		</tr>
 	</table>
+	<hr>根据维护键值对查询键值.
+	<table id="regiestTableMain" style="width:100%"><tr><td width='30'>操作</td><td width='150'>键</td><td>值</td></tr></table>
 </body>
 </html>

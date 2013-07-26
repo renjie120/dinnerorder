@@ -3,8 +3,9 @@ function init(str) {
 }
 var _path ;
 $(function() {
-	_path=  $('#wpath').val();
-	$('select').width(100);
+	_path=  $('#wpath').val(); 
+	$('select').width(100).val(-1);
+	$('#registerFormater').val('');
 	$('.title a[.open,.close]').live('click', function() {
 		$(this).toggleClass("open").toggleClass("close");
 		$(this).parent().parent().next().toggle();
@@ -358,10 +359,11 @@ function addSystem(obj) {
 			eval("var _d = " + d); 
 			if (_d.result == 1) {
 				$('select[name=system]').append(
-						"<option value='" + _d.code + "'>" + desc
+						"<option value='" + _d.code + "' code='"+system+"'>" + desc
 								+ "</option>");
 				_s.val('');
 				$(obj).prev().val('');
+				$('select').val(-1);
 			} else {
 				alert('添加失败!');
 			}
@@ -386,11 +388,11 @@ function addTable(obj) {
 			eval("var _d = " + d);
 			if (_d.result == 1) {
 				$('select[name=table]').append(
-						"<option value='" + _d.code + "'>" + desc
+						"<option value='" + _d.code + "' code='"+tbname+"'>" + desc
 								+ "</option>");
 				_s.val('');
-				$(obj).prev().val('');
-				$(obj).parent().find('#sel1').val('-1');
+				$(obj).prev().val(''); 
+				$('select').val(-1);
 			} else {
 				alert('添加失败!');
 			}
@@ -417,12 +419,11 @@ function addColumn(obj) {
 			eval("var _d = " + d);
 			if (_d.result == 1) {
 				$('select[name=column]').append(
-						"<option value='" + _d.code + "'>" + desc
+						"<option value='" + _d.code + "' code='"+columnName+"'>" + desc
 								+ "</option>");
 				_s.val('');
-				$(obj).prev().val('');
-				$(obj).parent().find('#sel2').val(-1);
-				$(obj).parent().find('#sel3').val(-1);
+				$(obj).prev().val(''); 
+				$('select').val(-1);
 			} else {
 				alert('添加失败!');
 			}
@@ -451,10 +452,8 @@ function addFormater(obj) {
 			eval("var _d = " + d);
 			if (_d.result == 1) {
 				_s.val('');
-				$(obj).prev().val('');
-				$(obj).parent().find('#sel4').val(-1);
-				$(obj).parent().find('#sel5').val(-1);
-				$(obj).parent().find('#sel6').val(-1);
+				$(obj).prev().val(''); 
+				$('select').val(-1);
 			} else {
 				alert('添加失败!');
 			}
@@ -475,20 +474,28 @@ function changeSystem(obj){
 	});
 }
 
-function changeTable(obj){
-	var systemId = $(obj).pre().val();
+function changeTable(obj){ 
+	var systemId = $(obj).prev().val(); 
 	if(systemId!='-1'&&obj.value!=-1)
 	$.ajax({
 		url : "redisManager!getColumnByTable.action",
 		data : "systemId=" + systemId+"&tableId="+ obj.value,
 		type : "post",
-		success : function(d) {  
+		success : function(d) {   
 			$(obj).next().html('<option value="-1">请选择列名</option>'+d);  
 		}
 	});
 }
 
-
-function addMore() {
-	alert(this);
-}
+function changeColumn(obj){ 
+	var systemId = $(obj).prev().prev(); 
+	var tableId = $(obj).prev(); 
+	if(systemId.val()!='-1'&&obj.value!=-1&&tableId.val()!=-1)
+	{
+		$('#registerFormater').val(systemId.find('option:checked').attr('code')+":"+tableId.find('option:checked').attr('code')+":"+$(obj).find('option:checked').attr('code')+":{id}");
+	}
+	else {
+		$('#registerFormater').val('');
+	}
+} 
+ 

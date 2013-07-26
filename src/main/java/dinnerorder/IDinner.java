@@ -185,6 +185,13 @@ public interface IDinner {
 	public List<People> getPeopleByCostsRank(int groupSno); 
 	
 	/**
+	 * 查询欠费排行榜.
+	 * @param groupSno
+	 * @return
+	 */
+	public List<People> peopleByQianfeiMoneyRank(int groupSno); 
+	
+	/**
 	 * 返回一个分组里面的全部人员.
 	 * @param groupSno
 	 * @return

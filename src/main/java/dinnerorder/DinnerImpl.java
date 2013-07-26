@@ -759,6 +759,9 @@ public class DinnerImpl implements IDinner {
 			People _p = new People();
 			_p.setSno(Integer.parseInt(new String(p)));
 			_p.setName(tool.getKey(RedisColumn.peopleName(_p.getSno())));
+			if("米饭".equals(_p.getName())){
+				continue;
+			}
 			double sum = 0;
 			for (byte[] o:orders){
 				String cost = tool.getKey(RedisColumn.orderCost(Integer.parseInt(new String(o))));
@@ -806,6 +809,23 @@ public class DinnerImpl implements IDinner {
 			}
 		});
 		return tool.getSet(RedisColumn.groupAndPeopleToOrder(g, p));
+	}
+
+	@Override
+	public List<People> peopleByQianfeiMoneyRank(int groupSno) {
+		List<People> costrank  = getPeopleByCostsRank(groupSno);
+		Map<byte[], byte[]> s = tool.getMapAll(RedisColumn
+				.peopleToRechargeMoney());
+		for (People p : costrank) {
+			if(s.get((p.getSno()+"").getBytes())!=null){
+				double chargeMoney = Double.parseDouble(new String(s.get((p.getSno()+"").getBytes())));
+				p.setRechargeSum(p.getRechargeSum()-chargeMoney);
+			} else{
+				p.setRechargeSum(p.getRechargeSum());
+			}
+		}
+		Collections.sort(costrank);
+		return costrank;
 	}
 
 }

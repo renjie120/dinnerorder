@@ -261,6 +261,15 @@ public class DinnerAction {
 		request.setAttribute("title", "消费金额统计排行榜");
 		return "newTable";
 	} 
+	
+	public String peopleByQianfeiMoneyRank() {
+		HttpServletRequest request = ServletActionContext.getRequest();
+		String groupSno = "" + request.getSession().getAttribute("groupSno"); 
+		List<People> p = dinner.peopleByQianfeiMoneyRank(Integer.parseInt(groupSno)); 
+		request.setAttribute("rankPeople", p);
+		request.setAttribute("title", "欠费统计排行榜");
+		return "newTable";
+	} 
 	  
 	/**
 	 * 根据菜名的订单数的清单.

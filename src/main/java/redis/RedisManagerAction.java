@@ -98,11 +98,11 @@ public class RedisManagerAction {
 		List<Menu> all_system = new ArrayList<Menu>();
 		List<byte[]> allSystem = redisTool.getList(by);
 		for (byte[] b : allSystem) {
-			String desc = redisTool.getKey(RegisterSystem.desc(Integer
-					.parseInt(new String(b))));
+			int sno = Integer.parseInt(new String(b)); 
 			Menu m = new Menu();
-			m.setSno(Integer.parseInt(new String(b)));
-			m.setMenuName(desc);
+			m.setMenuUrl(redisTool.getKey(RegisterSystem.code(sno)));
+			m.setSno(sno);
+			m.setMenuName(redisTool.getKey(RegisterSystem.desc(sno)));
 			all_system.add(m);
 		}
 		return all_system;
@@ -124,7 +124,7 @@ public class RedisManagerAction {
 		StringBuilder bui = new StringBuilder(100);
 		if (mns != null && mns.size() > 0)
 			for (Menu m : mns) {
-				bui.append("<option value='" + m.getSno() + "'>"
+				bui.append("<option value='" + m.getSno() + "' code='"+m.getMenuUrl()+"'>"
 						+ m.getMenuName() + "</option>");
 			}
 		return bui.toString();

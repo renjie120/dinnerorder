@@ -650,7 +650,7 @@ public class BaseRedisTool {
 					@Override
 					public Object doInRedis(RedisConnection connection)
 							throws DataAccessException {
-						connection.set((val + "").getBytes(), system.getBytes());
+						connection.set(RegisterSystem.code(val), system.getBytes());
 						connection.set(RegisterSystem.desc(val),
 								desc.getBytes());
 						connection.lPush(RegisterSystem.regiest(),
@@ -680,7 +680,7 @@ public class BaseRedisTool {
 					@Override
 					public Object doInRedis(RedisConnection connection)
 							throws DataAccessException {
-						connection.set((val + "").getBytes(),
+						connection.set(RegisterSystem.code(val),
 								tableName.getBytes());
 						connection.set(RegisterSystem.desc(val),
 								desc.getBytes());
@@ -714,7 +714,7 @@ public class BaseRedisTool {
 					@Override
 					public Object doInRedis(RedisConnection connection)
 							throws DataAccessException {
-						connection.set((val + "").getBytes(), column.getBytes());
+						connection.set(RegisterSystem.code(val), column.getBytes());
 						connection.set(RegisterSystem.desc(val),
 								desc.getBytes());
 						connection.lPush(
@@ -748,7 +748,7 @@ public class BaseRedisTool {
 					@Override
 					public Object doInRedis(RedisConnection connection)
 							throws DataAccessException {
-						connection.set((val + "").getBytes(),
+						connection.set(RegisterSystem.code(val),
 								formater.getBytes());
 						connection.set(RegisterSystem.desc(val),
 								desc.getBytes());

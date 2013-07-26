@@ -13,7 +13,9 @@ public class RegisterSystem {
 	public final static String REGISTER_COLUMN = "_column";
 	public final static String REGISTER_FORMATTER = "_formater";
 	public final static String REGISTER_DESC = "_desc";
+	public final static String REGISTER_CODE = "_code";
 
+	
 	public static byte[] regiest() {
 		return new Key(REGISTER_PRE).getId();
 	}
@@ -24,6 +26,10 @@ public class RegisterSystem {
 
 	public static byte[] desc(int code) {
 		return new Key(REGISTER_PRE).add(REGISTER_DESC).add(code).getId();
+	}
+	
+	public static byte[] code(int code) {
+		return new Key(REGISTER_PRE).add(REGISTER_CODE).add(code).getId();
 	}
 	
 	public static byte[] table(int system, int table) {
