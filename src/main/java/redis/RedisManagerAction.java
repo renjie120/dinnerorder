@@ -150,6 +150,28 @@ public class RedisManagerAction {
 		request.setAttribute("allSystem", allSystem);
 		return "manager";
 	}
+	
+	/**
+	 * 返回表格树第一级别.
+	 * @return
+	 */
+	public String getFirstLevel() {
+		List<Menu> allSystem = getAllSystem();
+		StringBuilder build = new StringBuilder(100);
+		build.append("[");
+		for (Menu m : allSystem) {
+			build.append("{'sno':'" + m.getSno()).append("',");
+			build.append("'code':'" + m.getMenuUrl()).append("',");
+			build.append("'parentSno':'-1',");
+			build.append("'isLeaf':'0',");
+			build.append("'name':'" + m.getMenuName()).append("'},");
+		} 
+		build = build.deleteCharAt(build.lastIndexOf(","));
+		build.append("]");
+		write(build.toString());
+		return null;
+	}
+
 
 	public String deleteKey() {
 		redisTool.deleteKey(keys);

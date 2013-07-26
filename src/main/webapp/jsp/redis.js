@@ -6,18 +6,39 @@ $(function() {
 	_path=  $('#wpath').val(); 
 	$('select').width(100).val(-1);
 	$('#registerFormater').val('');
-	$('#gridTree').gridTree({
-		columnModel: model, 
-		data:json ,
-		idColumn: 'idid', 
-		parentColumn: 'parentVal',  
-		height: '300px',
-		width: '600px', 
-		debug:true,
-		lazyLoadUrl:'<%=basePath%>report/getSub?'+getArg(),
-		dynamicColumn:'isparent',
-		tableId:'reportTable'+id,			
-	});
+	var GridColumnType = [ 
+    {
+        header: '名称',
+        headerIndex: 'name',
+        width: '200px'
+    },
+    {
+        header: '编码',
+        headerIndex: 'code',
+        width: '200px'
+    }];
+     var content = {
+        columnModel: GridColumnType,
+        dataUrl: "redisManager!getFirstLevel.action",
+        lazyLoadUrl:"redisManager!getFirstLevel.action",
+        idColumn: 'sno',
+        //id所在的列,一般是主键(不一定要显示出来)
+        parentColumn: 'parentSno', 
+        height: '300px',
+        width: '100%', 
+        debug: true,  
+        rowCount: true,
+        onLazyLoadSuccess: function(gt) { //alert('懒加载执行完了..');
+        },
+        onSuccess: function(gt) { //alert('初次加载表格树执行完了..');
+        },
+        onPagingSuccess: function(gt) { //alert('翻页执行完了..');
+        },
+        lazy: true,
+        //使用懒加载模式（此时打开全部，关闭全部功能不可使用）
+        leafColumn: 'isLeaf' 
+    };
+	$('#gridTree').gridTree(content);
 	$('.title a.open,a.close').live('click', function() {
 		$(this).toggleClass("open").toggleClass("close");
 		$(this).parent().parent().next().toggle();
