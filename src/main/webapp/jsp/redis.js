@@ -6,7 +6,19 @@ $(function() {
 	_path=  $('#wpath').val(); 
 	$('select').width(100).val(-1);
 	$('#registerFormater').val('');
-	$('.title a[.open,.close]').live('click', function() {
+	$('#gridTree').gridTree({
+		columnModel: model, 
+		data:json ,
+		idColumn: 'idid', 
+		parentColumn: 'parentVal',  
+		height: '300px',
+		width: '600px', 
+		debug:true,
+		lazyLoadUrl:'<%=basePath%>report/getSub?'+getArg(),
+		dynamicColumn:'isparent',
+		tableId:'reportTable'+id,			
+	});
+	$('.title a.open,a.close').live('click', function() {
 		$(this).toggleClass("open").toggleClass("close");
 		$(this).parent().parent().next().toggle();
 	});
