@@ -5,19 +5,7 @@ var _path ;
 $(function() {
 	_path=  $('#wpath').val(); 
 	$('select').width(100).val(-1);
-	$('#registerFormater').val('');
-	$('#gridTree').gridTree({
-		columnModel: model, 
-		data:json ,
-		idColumn: 'idid', 
-		parentColumn: 'parentVal',  
-		height: '300px',
-		width: '600px', 
-		debug:true,
-		lazyLoadUrl:'<%=basePath%>report/getSub?'+getArg(),
-		dynamicColumn:'isparent',
-		tableId:'reportTable'+id,			
-	});
+	$('#registerFormater').val(''); 
 	$('.title a.open,a.close').live('click', function() {
 		$(this).toggleClass("open").toggleClass("close");
 		$(this).parent().parent().next().toggle();
@@ -91,8 +79,7 @@ $(function() {
 																	+ "</span></td><td ><img src='"+_path+"/jsp/onError.gif' onclick='deletethis(this)'/></td><td>重命名:<input rename id='"
 																	+ _v
 																	+ "' /><a  class='set' onclick='rename(this)'></a></td></tr>"
-																	+ buf
-																			.join(''));
+																	+ buf.join(''));
 										} else if (data.type == 'list') {
 											var buf = [];
 											var _v = $('[name=exists]').val();
@@ -116,8 +103,7 @@ $(function() {
 																	+ "</span></td><td ><img src='"+_path+"/jsp/onError.gif' onclick='deletethis(this)'/></td><td>重命名:<input rename id='"
 																	+ _v
 																	+ "' /><a  class='set' onclick='rename(this)'></a></td></tr>"
-																	+ buf
-																			.join(''));
+																	+ buf.join(''));
 										} else if (data.type == 'set') {
 											var buf = [];
 											var _v = $('[name=exists]').val();
@@ -198,11 +184,14 @@ $(function() {
 						eval("var data=" + d);
 						var i = 0;
 						var buf = [];
+						var count = 0;
+						count = data.length;
+						var _v = $('[name=keys]').val();
 						buf.push("<tr class='title'><td >查找："
-								+ $('[name=keys]').val() + "结果如下:</td></tr>");
+								+ $('[name=keys]').val() + "结果记录数量:("+count+")<input type='checkbox' onchange='pickAll(this)' /><button onclick='deleteBatch(this)'>删除</button></td></tr>");
 						buf.push("<tr><td><div><table>");
 						for ( var ii in data) {
-							buf.push("<tr><td><img src='"+_path+"/jsp/onError.gif' onclick='deleteQuick(this)'/><span>" + data[ii] + "</span></td></tr>");
+							buf.push("<tr><td><input type='checkbox' tag='"+data[ii]+"'/ ><img src='"+_path+"/jsp/onError.gif' onclick='deleteQuick(this)'/><span>" + data[ii] + "</span></td></tr>");
 						}
 						buf.push('</table></div></td></tr>');
 						$('#keysTable').prepend(buf.join(''));
@@ -234,6 +223,34 @@ $(function() {
 				});
 			});
 });
+
+function pickAll(obj){
+	if(obj.checked){
+		 $(obj).parent().parent().next().find('table input[type=checkbox]').attr('checked','true') ;
+	}else{
+		 $(obj).parent().parent().next().find('table input[type=checkbox]').removeProp('checked') ;
+	}
+}
+
+function deleteBatch(obj){
+	var allChk = $(obj).parent().parent().next().find('table input[type=checkbox]:checked');
+	if (confirm('确定批量删除总共('+allChk.size()+')项？\n数据无价，谨慎操作！')) {
+		var ans = [];
+		allChk.each(function(){
+			ans.push($(this).attr('tag'));
+		}); 
+		$.ajax({
+			url : "redisManager!deleteBatchKey.action",
+			data : "keys=" + ans.join("####"),
+			type : "post",
+			success : function(d) {
+				allChk.each(function(){
+					$(this).parent().parent().remove();
+				});
+			}
+		});  
+	}
+}
 
 function rename(obj) {
 	var v = $(obj).parent().parent().find('td').eq(0).text();
@@ -504,10 +521,78 @@ function changeColumn(obj){
 	var tableId = $(obj).prev(); 
 	if(systemId.val()!='-1'&&obj.value!=-1&&tableId.val()!=-1)
 	{
-		$('#registerFormater').val(systemId.find('option:checked').attr('code')+":"+tableId.find('option:checked').attr('code')+":"+$(obj).find('option:checked').attr('code')+":{id}");
+		$('#registerFormater').val(systemId.find('option:checked').attr('code')+":"+tableId.find('option:checked').attr('code')+":{id}:"+$(obj).find('option:checked').attr('code'));
 	}
 	else {
 		$('#registerFormater').val('');
 	}
 } 
  
+var hideSystem = false;
+function openThisSystem(obj){
+	var _val = $(obj).attr('tag');
+	$(obj).toggleClass("open").toggleClass("close"); 
+	//第一次请求的时候查询后台得到子节信息 
+	if($('span[systemid='+_val+']').size()<1){
+		$.ajax({
+			url : "redisManager!openThisSystem.action",
+			data : "systemId=" + _val,
+			type : "post",
+			success : function(d) {    
+				$(obj).parent().parent().after(d);  
+			}
+		});
+	}else{ 
+		if(!hideSystem)
+			$('span[systemid='+_val+']').parent().parent().hide();
+		else
+			$('span[systemid='+_val+']').parent().parent().show();
+		hideSystem=!hideSystem;
+	}
+}
+
+var hideTable = false;
+function openThisTable(obj){
+	var _val = $(obj).attr('tag');
+	var _systemId = $(obj).attr('systemId');
+	$(obj).toggleClass("open").toggleClass("close"); 
+	if($('span[systemid='+_systemId+'][tableid='+_val+']').size()<1){
+		$.ajax({
+			url : "redisManager!openThisTable.action",
+			data : "systemId=" + _systemId+"&tableId="+_val,
+			type : "post",
+			success : function(d) {   
+				$(obj).parent().parent().after(d);  
+			}
+		});
+	}else{ 
+		if(!hideTable)
+			$('span[systemid='+_systemId+'][tableid='+_val+']').parent().parent().hide();
+		else
+			$('span[systemid='+_systemId+'][tableid='+_val+']').parent().parent().show();
+		hideTable=!hideTable;
+	}
+}
+
+function openThisColumn(obj){
+	var _val = $(obj).attr('tag');
+	var _systemId = $(obj).attr('systemid');
+	var _tableId = $(obj).attr('tableid');
+	$(obj).toggleClass("open").toggleClass("close"); 
+	if($('span[systemid='+_systemId+'][tableid='+_tableId+'][columnid='+_val+']').size()<1){
+		$.ajax({
+			url : "redisManager!openThisColumn.action",
+			data : "systemId=" + _systemId+"&tableId="+_tableId+"&columnId="+_val,
+			type : "post",
+			success : function(d) {   
+				$(obj).parent().parent().after(d);  
+			}
+		});
+	}else{ 
+		if(!hideTable)
+			$('span[systemid='+_systemId+'][tableid='+_tableId+'][columnid='+_val+']').parent().parent().hide();
+		else
+			$('span[systemid='+_systemId+'][tableid='+_tableId+'][columnid='+_val+']').parent().parent().show();
+		hideTable=!hideTable;
+	}
+}

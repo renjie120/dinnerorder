@@ -25,11 +25,29 @@ public class RedisManagerAction {
 	 * redis操作工具类.
 	 */
 	private BaseRedisTool redisTool;
+	/**
+	 * 查询界面的配置信息
+	 */
 	private String config;
+	/**
+	 * 进行模糊匹配的键
+	 */
 	private String keys;
+	/**
+	 * 输入的键值
+	 */
 	private String value;
+	/**
+	 * 系统id
+	 */
 	private String systemId;
+	/**
+	 * 表名id
+	 */
 	private String tableId;
+	/**
+	 * 列id
+	 */
 	private String columnId;
 
 	public String getSystemId() {
@@ -94,6 +112,11 @@ public class RedisManagerAction {
 		this.redisTool = redisTool;
 	}
 
+	/**
+	 * 得到一个系统注册的信息的实体类.
+	 * @param by
+	 * @return
+	 */
 	private List<Menu> getMenus(byte[] by) {
 		List<Menu> all_system = new ArrayList<Menu>();
 		List<byte[]> allSystem = redisTool.getList(by);
@@ -108,18 +131,38 @@ public class RedisManagerAction {
 		return all_system;
 	}
 
+	/**
+	 * 返回全部的注册的表.
+	 * @param systemId
+	 * @return
+	 */
 	private List<Menu> getAllTable(int systemId) {
 		return getMenus(RegisterSystem.system(systemId));
 	}
 
+	/**
+	 * 返回全部注册的列.
+	 * @param systemId
+	 * @param tableId
+	 * @return
+	 */
 	private List<Menu> getAllColumn(int systemId, int tableId) {
 		return getMenus(RegisterSystem.table(systemId, tableId));
 	}
 
+	/**
+	 * 返回全部注册的系统.
+	 * @return
+	 */
 	private List<Menu> getAllSystem() {
 		return getMenus(RegisterSystem.regiest());
 	}
 
+	/**
+	 * 返回菜单列表的table表格字符串.
+	 * @param mns
+	 * @return
+	 */
 	private String menuListToStr(List<Menu> mns) {
 		StringBuilder bui = new StringBuilder(100);
 		if (mns != null && mns.size() > 0)
@@ -130,6 +173,10 @@ public class RedisManagerAction {
 		return bui.toString();
 	}
 
+	/**
+	 * 根据表名返回对应的列的列表.
+	 * @return
+	 */
 	public String getColumnByTable() {
 		List<Menu> allSystem = getAllColumn(Integer.parseInt(systemId),
 				Integer.parseInt(tableId));
@@ -137,53 +184,96 @@ public class RedisManagerAction {
 		return null;
 	}
 
+	/**
+	 * 根据系统返回对应的表名列表.
+	 * @return
+	 */
 	public String getTableBySystem() {
 		List<Menu> allTable = getAllTable(Integer.parseInt(systemId));
 		write(menuListToStr(allTable));
 		return null;
 	}
 
+	/**
+	 * 初始化界面.
+	 * @return
+	 */
 	public String manager() {
+		//查询注册系统的下拉菜单.
 		List<Menu> allSystem = getAllSystem();
 		HttpServletRequest request = ServletActionContext.getRequest();
-		request.setAttribute("count", redisTool.dbSize());
+		//得到全部的key的长度.
+		request.setAttribute("count", redisTool.dbSize());		
 		request.setAttribute("allSystem", allSystem);
 		return "manager";
 	}
 
+
+	/**
+	 * 删除指定key.
+	 * @return
+	 */
 	public String deleteKey() {
 		redisTool.deleteKey(keys);
 		return null;
 	}
+	
+	/**
+	 * 批量删除key.
+	 * @return
+	 */
+	public String deleteBatchKey() {
+		redisTool.deleteBatchKey(keys);
+		return null;
+	}
 
+	/**
+	 * 重命名key.
+	 * @return
+	 */
 	public String rename() {
 		redisTool.rename(keys, value);
 		return null;
 	}
 
+	/**
+	 * 删除列表里面的值.
+	 * @return
+	 */
 	public String removeListValue() {
 		redisTool.removeListValue(keys, value);
 		return null;
 	}
 
+	/**
+	 * 删除set里面的值
+	 * @return
+	 */
 	public String removeSetValue() {
 		redisTool.removeSetValue(keys, value);
 		return null;
 	}
 
+	/**
+	 * 删除含有权重的集合里面的值.
+	 * @return
+	 */
 	public String removeZScore() {
 		redisTool.removeZScore(keys, value);
 		return null;
 	}
 
+	/**
+	 * 删除hash表里面的值.
+	 * @return
+	 */
 	public String removeHashValue() {
 		redisTool.removeHashValue(keys, value);
 		return null;
 	}
 
 	/**
-	 * 返回全部的控制台信息.
-	 * 
+	 * 返回指定的配置信息列表.
 	 * @return
 	 */
 	public String getConfig() {
@@ -202,8 +292,7 @@ public class RedisManagerAction {
 
 	/**
 	 * 
-	 * 判断是否存在一个指定的key.
-	 * 
+	 * 判断是否存在一个指定的key. 
 	 * @return
 	 */
 	public String exists() {
@@ -217,6 +306,10 @@ public class RedisManagerAction {
 		return null;
 	}
 
+	/**
+	 * 向response中写入ajax字符串.
+	 * @param str
+	 */
 	public void write(String str) {
 		HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("text/html;charset=GBK");
@@ -227,8 +320,17 @@ public class RedisManagerAction {
 		}
 	}
 
+	/**
+	 * 键类型.
+	 */
 	private String keytype;
+	/**
+	 * 键的值.
+	 */
 	private String val1;
+	/**
+	 * 重命名的新的键值.
+	 */
 	private String newKeyName;
 
 	public String getNewKeyName() {
@@ -265,6 +367,10 @@ public class RedisManagerAction {
 
 	private String val2;
 
+	/**
+	 * 添加新的键.
+	 * @return
+	 */
 	public String addKey() {
 		HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("text/html;charset=GBK");
@@ -309,9 +415,21 @@ public class RedisManagerAction {
 		return null;
 	}
 
+	/**
+	 * 系统名
+	 */
 	private String system;
+	/**
+	 * 列名.
+	 */
 	private String columnName;
+	/**
+	 * 表名
+	 */
 	private String tbname;
+	/**
+	 * 格式化名称.
+	 */
 	private String formater;
 
 	public String getSystem() {
@@ -356,6 +474,10 @@ public class RedisManagerAction {
 		this.desc = desc;
 	}
 
+	/**
+	 * 注册系统.
+	 * @return
+	 */
 	public String regiestSystem() {
 		HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("text/html;charset=GBK");
@@ -374,7 +496,62 @@ public class RedisManagerAction {
 		}
 		return null;
 	}
-
+ 
+	/**
+	 * 获取下面下面的表名列表的table字符串..
+	 * @return
+	 */
+	public String openThisSystem(){
+		int _systemId = Integer.parseInt(systemId);
+		List<Menu> tables = redisTool.findTableBySystem(_systemId);
+		StringBuilder bui = new StringBuilder();
+		for(Menu m:tables){
+			bui.append("<tr><td>&nbsp;&nbsp;<span class=\"open\"  tag=\""+m.getSno()+"\" systemId='"+_systemId+"' onclick=\"openThisTable(this)\">" +
+					"</span></td><td>"+m.getMenuName()+"</td><td>"+m.getMenuUrl()+"</td></tr>");
+		}
+		write(bui.toString());
+		return null;
+	}
+	
+	/**
+	 * 获取表名下面的列的table字符串.
+	 * @return
+	 */
+	public String openThisTable(){
+		int _systemId = Integer.parseInt(systemId);
+		int _tableId = Integer.parseInt(tableId);
+		List<Menu> tables = redisTool.findColumnByTable(_systemId,_tableId);
+		StringBuilder bui = new StringBuilder();
+		for(Menu m:tables){
+			bui.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"open\"  tag=\""+m.getSno()+"\" systemId='"+_systemId+"' tableId='"+_tableId+"' onclick=\"openThisColumn(this)\">" +
+					"</span></td><td>"+m.getMenuName()+"</td><td>"+m.getMenuUrl()+"</td></tr>");
+		}
+		write(bui.toString());
+		return null;
+	}
+	
+	/**
+	 * 得到列的下面的格式化的table字符串.
+	 * @return
+	 */
+	public String openThisColumn(){
+		int _systemId = Integer.parseInt(systemId);
+		int _tableId = Integer.parseInt(tableId);
+		int _columnId = Integer.parseInt(columnId);
+		List<Menu> tables = redisTool.findFormatterByColumn(_systemId,_tableId,_columnId);
+		StringBuilder bui = new StringBuilder();
+		for(Menu m:tables){
+			bui.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;<span columnId='"+_columnId+"'  tag=\""+m.getSno()+"\" systemId='"+_systemId+"' tableId='"+_tableId+"' >" +
+					"</span></td><td>"+m.getMenuName()+"</td><td>"+m.getMenuUrl()+"</td></tr>");
+		}
+		write(bui.toString());
+		return null;
+	}
+	
+	/**
+	 * 注册表名到系统中.
+	 * @return
+	 */
 	public String regiestTable() {
 		HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("text/html;charset=GBK");
@@ -394,6 +571,10 @@ public class RedisManagerAction {
 		return null;
 	}
 
+	/**
+	 * 注册列到系统中.
+	 * @return
+	 */
 	public String regiestColumn() {
 		HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("text/html;charset=GBK");
@@ -413,6 +594,10 @@ public class RedisManagerAction {
 		return null;
 	}
 
+	/**
+	 * 注册格式化字符串.
+	 * @return
+	 */
 	public String regiestFormat() {
 		HttpServletResponse response = ServletActionContext.getResponse();
 		response.setContentType("text/html;charset=GBK");
@@ -432,5 +617,6 @@ public class RedisManagerAction {
 		}
 		return null;
 	}
+
 
 }
