@@ -58,6 +58,16 @@ function saveOrder() {
 		alert("必须填写人名或者选择人名!");
 		return false;
 	}
+	var pName = $('#peopleName').val();
+	if (pName != '') {
+		var _v = findVByName('peopleList', pName);
+		if (_v != -1) {
+			if(confirm('重复添加了人名，将直接利用下拉菜单的值\n\n确实重名，请添加一个后缀,例"张三(2)"')){
+				$('#peopleList').val(_v);
+				$('#pName').val('');
+			}
+		}
+	}
 	if (isNaN($('#money').val())) {
 		alert("请输入有效金额!");
 		return false;

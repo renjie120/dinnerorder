@@ -28,7 +28,7 @@ function login() {
 		p.push("groupNameList=" + $('#groupNameList').val());
 		p.push("pass=" + $('#pass').val());
 		if ($('#groupName').val() == '' && $('#groupNameList').val() == '-1') {
-			alert("必须填写登录分组名或者选择一个!");
+			alert("必须填写'订餐小组'或者选择一个'小组'!");
 			return false;
 		}
 		var param = p.join('&');
@@ -52,7 +52,7 @@ function login() {
 <body>
 	<table >
 		<tr>
-			<td>分组</td>
+			<td>订餐小组</td>
 			<td><select id="groupNameList" style="width: 200px"><option
 						value="-1">请选择</option>
 					<%
@@ -65,21 +65,24 @@ function login() {
 					%></select></td>
 		</tr>
 		<tr>
-			<td>新建分组</td>
+			<td>新建小组</td>
 			<td><input name="groupName" id="groupName" /></td>
 		</tr>
 		<tr>
-			<td>管理员密码</td>
-			<td><input type="password" id="pass" /></td>
-		</tr>
+			<td>小组管理员密码</td>
+			<td><input type="password" id="pass" />(初始密码为第一次"新建小组"时，输入的密码)</td>
+		</tr> 
 		<tr>
 			<td colspan="2">
-				<button onclick="login()">登录(若是新分组，则自动注册新分组,记住密码,下次选择分组即可.)</button>
+				<button onclick="login()" style="width:100px">登录</button>(非管理员不用输入密码)
 			</td>
 		</tr>
-	</table>
-	<br>
-	<a href="redisManager!manager.action">redis控制台</a>
-	<br>
+	</table> 
+	<br><br>
+	使用说明：<br>
+	1.第一次直接在"新建小组"中输入一个组名，以及管理员密码（此次即初始密码,没有输入则为''）<br>
+	2.非第一次进入，请选择 '订餐小组'中所在的组名，直接登录即可,管理员要使用密码<br> 
+	3.普通用户权限：下单,查看排行榜,查看充值记录<br>
+	4.管理员额外权限：充值,删除订单,删除充值记录.<br>
 </body>
 </html>

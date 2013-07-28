@@ -17,13 +17,14 @@
 <base href="<%=basePath%>">
 <script type="text/javascript"
 	src="<%=basePath%>/js/jquery-1.7.1.min.js"></script>
+	<!-- 
 <link rel="stylesheet" type="text/css" href="<%=basePath%>js/gridTree/core.css">
 <link rel="stylesheet" type="text/css" href="<%=basePath%>js/gridTree/style.css">
 <link rel="stylesheet" type="text/css" href="<%=basePath%>js/gridTree/GridTree.css">
 <script type="text/javascript"
 	src="<%=basePath%>js/gridTree/hashMap.js"></script>
 <script type="text/javascript"
-	src="<%=basePath%>js/gridTree/GridTree.All.js"></script>
+	src="<%=basePath%>js/gridTree/GridTree.All.js"></script> -->
 <script type="text/javascript" src="<%=basePath%>/jsp/redis.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <style type="text/css">
@@ -309,6 +310,18 @@ input {
 		</table>
 		<hr>
 		根据维护键值对查询键值.
-		 <DIV id="gridTree"></div>
+		 <DIV id="gridTree">
+		 <table width='100%'><tr><td width="80px">操作</td><td width="30%">键</td><td>值</td></tr>
+		 <%
+							if (allSystem != null && allSystem.size() > 0) {
+								for (Menu m : allSystem) {
+						%>
+						<tr><td><span class="open"  tag="<%=m.getSno()%>" onclick="openThisSystem(this)"></span></td><td><%=m.getMenuName()%></td><td><%=m.getMenuUrl()%></td></tr> 
+						<%
+							}
+							}
+						%>
+		 </table>
+		 </div>
 	</body>
 </html>

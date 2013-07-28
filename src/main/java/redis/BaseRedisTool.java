@@ -1,6 +1,7 @@
 package redis;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +17,10 @@ import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 
+import bean.Menu;
+
 /**
- * 基础的redis操作封装. 只提供关于只读方法的封装，对于写操作可能涉及到事务等操作,示例代码：DictionaryRedis.java
+ * 基础的redis操作封装. 
  * 
  * @author lisq
  * 
@@ -124,6 +127,22 @@ public class BaseRedisTool {
 			public Set<byte[]> doInRedis(RedisConnection connection)
 					throws DataAccessException {
 				return connection.sMembers(k);
+			}
+		});
+	}
+	
+	/**
+	 * 返回两个set的交集
+	 * @param k
+	 * @param k2
+	 * @return
+	 */
+	public Set<byte[]> interSet(final byte[]... k) {
+		return template.execute(new RedisCallback<Set<byte[]>>() {
+			@Override
+			public Set<byte[]> doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				return connection.sInter(k);
 			}
 		});
 	}
@@ -273,10 +292,13 @@ public class BaseRedisTool {
 			public String doInRedis(RedisConnection connection)
 					throws DataAccessException {
 				DataType tp = connection.type(key);
+				//返回字符串类型的值的json串.
 				if (DataType.STRING.equals(tp)) {
 					return "{'type':'string','value':'"
 							+ new String(connection.get(key)) + "'}";
-				} else if (DataType.HASH.equals(tp)) {
+				}
+				//返回hash表类型的json串.
+				else if (DataType.HASH.equals(tp)) {
 					Map<byte[], byte[]> m = connection.hGetAll(key);
 					Iterator<Entry<byte[], byte[]>> it = m.entrySet()
 							.iterator();
@@ -294,7 +316,9 @@ public class BaseRedisTool {
 					}
 					return "{'type':'hash','value':"
 							+ bui.append("]").toString() + "}";
-				} else if (DataType.LIST.equals(tp)) {
+				}
+				//返回列表类型的json串.
+				else if (DataType.LIST.equals(tp)) {
 					List<byte[]> list = connection.lRange(key, 0, -1);
 					StringBuilder bui = new StringBuilder(100);
 					bui.append("[");
@@ -306,7 +330,9 @@ public class BaseRedisTool {
 					}
 					return "{'type':'list','value':"
 							+ bui.append("]").toString() + "}";
-				} else if (DataType.SET.equals(tp)) {
+				}
+				//返回集合类型的json串.
+				else if (DataType.SET.equals(tp)) {
 					Set<byte[]> s = connection.sMembers(key);
 					StringBuilder bui = new StringBuilder(100);
 					bui.append("[");
@@ -318,7 +344,9 @@ public class BaseRedisTool {
 					}
 					return "{'type':'set','value':"
 							+ bui.append("]").toString() + "}";
-				} else if (DataType.ZSET.equals(tp)) {
+				}
+				//返回带有权重集合的json串.
+				else if (DataType.ZSET.equals(tp)) {
 					Set<Tuple> s = connection.zRangeWithScores(key, 0, -1);
 					StringBuilder bui = new StringBuilder(100);
 					bui.append("[");
@@ -331,7 +359,9 @@ public class BaseRedisTool {
 					}
 					return "{'type':'zset','value':"
 							+ bui.append("]").toString() + "}";
-				} else
+				}
+				//否则就返回空串.
+				else
 					return "";
 			}
 
@@ -354,10 +384,22 @@ public class BaseRedisTool {
 		});
 	}
 
+	/**
+	 * 将字符串转换为字节数组.
+	 * @param s
+	 * @return
+	 */
 	private byte[] strToByte(String s) {
 		return s.getBytes();
 	}
 
+	/**
+	 * 添加一个新的键值.
+	 * @param keytype
+	 * @param newKeyName
+	 * @param val1
+	 * @param val2
+	 */
 	public void addKey(String keytype, String newKeyName, String val1,
 			String val2) {
 		final byte[] k = strToByte(keytype);
@@ -365,6 +407,7 @@ public class BaseRedisTool {
 		final byte[] n = strToByte(newKeyName);
 		final byte[] v1 = strToByte(val1);
 		final byte[] v2 = strToByte(val2);
+		//添加字符串
 		if ("str".equals(keytype)) {
 			template.execute(new RedisCallback() {
 				@Override
@@ -374,7 +417,9 @@ public class BaseRedisTool {
 					return null;
 				}
 			});
-		} else if ("strnx".equals(keytype)) {
+		}
+		//在找不到已有键的情况下添加字符串.
+		else if ("strnx".equals(keytype)) {
 			template.execute(new RedisCallback() {
 				@Override
 				public Object doInRedis(RedisConnection connection)
@@ -383,7 +428,9 @@ public class BaseRedisTool {
 					return null;
 				}
 			});
-		} else if ("listL".equals(keytype)) {
+		}
+		//在列表头插入新值
+		else if ("listL".equals(keytype)) {
 			template.execute(new RedisCallback() {
 				@Override
 				public Object doInRedis(RedisConnection connection)
@@ -392,7 +439,9 @@ public class BaseRedisTool {
 					return null;
 				}
 			});
-		} else if ("listR".equals(keytype)) {
+		}
+		//在列表尾添加新值
+		else if ("listR".equals(keytype)) {
 			template.execute(new RedisCallback() {
 				@Override
 				public Object doInRedis(RedisConnection connection)
@@ -401,7 +450,9 @@ public class BaseRedisTool {
 					return null;
 				}
 			});
-		} else if ("set".equals(keytype)) {
+		}
+		//添加值到集合中.
+		else if ("set".equals(keytype)) {
 			template.execute(new RedisCallback() {
 				@Override
 				public Object doInRedis(RedisConnection connection)
@@ -410,7 +461,9 @@ public class BaseRedisTool {
 					return null;
 				}
 			});
-		} else if ("zset".equals(keytype)) {
+		}
+		//添加值到带有权重的集合中.
+		else if ("zset".equals(keytype)) {
 			template.execute(new RedisCallback() {
 				@Override
 				public Object doInRedis(RedisConnection connection)
@@ -419,7 +472,9 @@ public class BaseRedisTool {
 					return null;
 				}
 			});
-		} else if ("hash".equals(keytype)) {
+		}
+		//添加值到hash中.
+		else if ("hash".equals(keytype)) {
 			template.execute(new RedisCallback() {
 				@Override
 				public Object doInRedis(RedisConnection connection)
@@ -428,7 +483,9 @@ public class BaseRedisTool {
 					return null;
 				}
 			});
-		} else if ("hashnx".equals(keytype)) {
+		}
+		//在找不到键值情况下添加至到hash中.
+		else if ("hashnx".equals(keytype)) {
 			template.execute(new RedisCallback() {
 				@Override
 				public Object doInRedis(RedisConnection connection)
@@ -480,7 +537,8 @@ public class BaseRedisTool {
 		if (key == null)
 			return;
 		final Set<byte[]> allKeys = allKeys(key.getBytes());
-		@SuppressWarnings("rawtypes")
+		//放在事务中进行删除批量的键.
+		@SuppressWarnings("rawtypes") 
 		SessionCallback sessionCallback = new SessionCallback() {
 			@Override
 			public Object execute(RedisOperations operations)
@@ -508,6 +566,10 @@ public class BaseRedisTool {
 		template.execute(sessionCallback);
 	}
 
+	/**
+	 * 删除指定键对应的值.
+	 * @param key
+	 */
 	public void deleteKey(String key) {
 		if (key == null)
 			return;
@@ -522,6 +584,41 @@ public class BaseRedisTool {
 			}
 
 		});
+	}
+	
+	/**
+	 * 批量删除多个键。
+	 * 多个键之间用####分割.
+	 * @param key
+	 */
+	public void deleteBatchKey(String key) {
+		if (key == null)
+			return; 
+		final String[]  keykey =key.split("####"); 
+		SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public Integer execute(RedisOperations operations)
+					throws DataAccessException {
+				operations.multi(); 
+				
+				operations.execute(new RedisCallback(){ 
+					@Override
+					public Object doInRedis(RedisConnection connection)
+							throws DataAccessException { 
+						int j = keykey.length;
+						for (int i = 0; i < j; i++) { 
+							connection.del(keykey[i].getBytes());
+						}
+						return null;
+					}
+					
+				});
+				operations.exec();
+				return null;
+			}
+		};
+		template.execute(sessionCallback);
 	}
 
 	/**
@@ -547,6 +644,11 @@ public class BaseRedisTool {
 		});
 	}
 
+	/**
+	 * 对指定键进行重命名.
+	 * @param key 原有键名
+	 * @param value 新键名
+	 */
 	public void rename(String key, String value) {
 		if (key == null || value == null)
 			return;
@@ -633,11 +735,22 @@ public class BaseRedisTool {
 		});
 	}
 
+	/**
+	 * 判断字符串是否为空.
+	 * @param str
+	 * @return
+	 */
 	private boolean isEmpty(String str) {
 		return str == null || "".equals(str.trim())
 				|| "null".equals(str.trim());
 	}
 
+	/**
+	 * 注册新的系统到_regiest中，并添加到_regiest的列表中.
+	 * @param system
+	 * @param desc
+	 * @return
+	 */
 	public int regiest(final String system, final String desc) {
 		final int val = generateKey(RedisColumn.snoFactory());
 		SessionCallback<Integer> sessionCallback = new SessionCallback<Integer>() {
@@ -667,6 +780,76 @@ public class BaseRedisTool {
 		return val;
 	}
 
+	/**
+	 * 根据系统的id返回所属的子表的集合.
+	 * @param systemId
+	 * @return
+	 */
+	public List<Menu> findTableBySystem(final int systemId) {
+		List<byte[]> tables = this.getList(RegisterSystem.system(systemId));
+		List<Menu> menus = new ArrayList<Menu>();
+		if(tables!=null&&tables.size()>0)
+		for (byte[] bt : tables) {
+			int cd = Integer.parseInt(new String(bt));
+			Menu m = new Menu();
+			m.setSno(cd);
+			m.setMenuName(this.getKey(RegisterSystem.desc(cd)));
+			m.setMenuUrl(this.getKey(RegisterSystem.code(cd)));
+			menus.add(m);
+		} 
+		return menus;
+	}
+	
+	/**
+	 * 根据系统id，表格id返回含有的列信息.
+	 * @param systemId
+	 * @param tableId
+	 * @return
+	 */
+	public List<Menu> findColumnByTable(final int systemId,final int tableId) {
+		List<byte[]> tables = this.getList(RegisterSystem.table(systemId,tableId));
+		List<Menu> menus = new ArrayList<Menu>();
+		if(tables!=null&&tables.size()>0)
+		for (byte[] bt : tables) {
+			int cd = Integer.parseInt(new String(bt));
+			Menu m = new Menu();
+			m.setSno(cd);
+			m.setMenuName(this.getKey(RegisterSystem.desc(cd)));
+			m.setMenuUrl(this.getKey(RegisterSystem.code(cd)));
+			menus.add(m);
+		} 
+		return menus;
+	}
+	
+	/**
+	 * 找到一个列里面的格式化字符串.
+	 * @param systemId
+	 * @param tableId
+	 * @param columnId
+	 * @return
+	 */
+	public List<Menu> findFormatterByColumn(final int systemId,final int tableId,final int columnId) {
+		List<byte[]> tables = this.getList(RegisterSystem.column(systemId,tableId,columnId));
+		List<Menu> menus = new ArrayList<Menu>();
+		if(tables!=null&&tables.size()>0)
+		for (byte[] bt : tables) {
+			int cd = Integer.parseInt(new String(bt));
+			Menu m = new Menu();
+			m.setSno(cd);
+			m.setMenuName(this.getKey(RegisterSystem.desc(cd)));
+			m.setMenuUrl(this.getKey(RegisterSystem.code(cd)));
+			menus.add(m);
+		} 
+		return menus;
+	}
+
+	/**
+	 * 注册一个表名.
+	 * @param system 系统
+	 * @param tableName 表
+	 * @param desc 描述信息
+	 * @return
+	 */
 	public int regiest(final String system, final String tableName,
 			final String desc) {
 		final int val = generateKey(RedisColumn.snoFactory());
@@ -699,6 +882,14 @@ public class BaseRedisTool {
 
 	}
 
+	/**
+	 * 注册一个列名.
+	 * @param system 系统
+	 * @param tableName 表名
+	 * @param column 列名
+	 * @param desc 描述信息
+	 * @return
+	 */
 	public int regiest(final String system, final String tableName,
 			final String column, final String desc) {
 		final int val = generateKey(RedisColumn.snoFactory());
@@ -732,6 +923,15 @@ public class BaseRedisTool {
 		return val;
 	}
 
+	/**
+	 * 注册一个列的格式化形式.
+	 * @param system 系统
+	 * @param tableName 表名
+	 * @param column 列名
+	 * @param formater 格式化名
+	 * @param desc 描述信息
+	 * @return
+	 */
 	public int regiest(final String system, final String tableName,
 			final String column, final String formater, final String desc) {
 		final int val = generateKey(RedisColumn.snoFactory());

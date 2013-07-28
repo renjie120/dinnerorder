@@ -59,7 +59,7 @@ public interface IDinner {
 	 * 查询充值记录.
 	 * @return
 	 */
-	public List<ReCharge> getRecharges();
+	public List<ReCharge> getRecharges(int groupSno);
 
 	/**
 	 * 保存人员信息.
@@ -87,7 +87,7 @@ public interface IDinner {
 	 * 返回下了订单的日期.
 	 * @return
 	 */
-	public List<String> getOrderTimeSet();
+	public List<String> getOrderTimeSet(int groupSno);
 
 	/**
 	 * 返回某人在某天的下的订单号.
@@ -95,7 +95,7 @@ public interface IDinner {
 	 * @param time
 	 * @return
 	 */
-	public List<String> getOrderByPeopleInOneDay(int people,String time);
+	public List<String> getOrderByPeopleAndGroupInOneDay(int people,String time,int groupSno);
 
 	/**
 	 * 得到某个分组的充值记录.
@@ -176,7 +176,7 @@ public interface IDinner {
 	 * 得到人员的充值记录排行榜.
 	 * @return
 	 */
-	public List<People> getPeopleByRechargesRank(); 
+	public List<People> getPeopleByRechargesRank(int groupSno); 
 	
 	/**
 	 * 人员消费排行榜
@@ -204,7 +204,7 @@ public interface IDinner {
 	 * @param tim
 	 * @return
 	 */
-	public Double getSumByDay(String tim); 
+	public Double getSumByDay(String tim,int groupSno); 
 	
 	/**
 	 * 

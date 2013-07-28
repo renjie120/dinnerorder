@@ -22,7 +22,7 @@ public class RedisColumn {
 	public final static String PEOPLE_TO_ORDER = "peopleToOrder";
 	public final static String PEOPLE_AND_TIME_TO_ORDER = "peopleAndTimeToOrder";
 	public final static String PEOPLE_TO_COSTSUM = "peopleToCostSum";
-	public final static String TIME_TO_ORDER = "timeToOrder";
+	public final static String TIME_TO_ORDER = "timeToOrder"; 
 	public final static String TIMEANDGROUP_TO_AVG = "timeAndGroupToAvg";
 	public final static String ORDER_TO_TIME = "orderToTime";
 	public final static String GROUP_TO_ORDER = "groupToOrder";
@@ -31,7 +31,7 @@ public class RedisColumn {
 	public final static String GROUP_AND_PEOPLE_TO_ORDER = "groupAndPeopleToOrder";
 	public final static String ORDER_PEOPLE_WITH_SCORE = "peopleWithScore";
 	public final static String ORDER_DINNER_WITH_SCORE = "dinnerWithScore";
-	public final static String ORDER_TIME_SET = "order_times_set";
+	public final static String ORDER_TIME_SET = "order_times_set"; 
 	public final static String ORDER_SUM_MONEY = "sumMoney";
 
 	public static void main(String[] args) {
@@ -145,7 +145,7 @@ public class RedisColumn {
 				.getId();
 	}
 
-
+  
 	/**
 	 * 时间对应的全部订单号.
 	 * 
@@ -156,16 +156,17 @@ public class RedisColumn {
 		return new Key(SYSTEM).add(ORDER_PRE).add(time).add(TIME_TO_ORDER)
 				.getId();
 	}
-
+	
 	/**
 	 * 得到有订单的全部时间的set.
 	 * 
 	 * @param time
 	 * @return
 	 */
-	public static byte[] orderTimeSet() {
-		return new Key(SYSTEM).add(ORDER_PRE).add(ORDER_TIME_SET).getId();
+	public static byte[] orderTimeSet(int group) {
+		return new Key(SYSTEM).add(ORDER_PRE).add(group).add(ORDER_TIME_SET).getId();
 	}
+	 
 
 	public static byte[] orderMoney(int sno) {
 		return new Key(SYSTEM).add(ORDER_PRE).add(sno).add(ORDER_MONEY).getId();
@@ -303,8 +304,8 @@ public class RedisColumn {
 	 * @param people
 	 * @return
 	 */
-	public static byte[] peopleToRechargeMoney() {
-		return new Key(SYSTEM).add(RECHARGE_PRE).add(PEOPLE_TO_RECHARGE_MONEY)
+	public static byte[] peopleToRechargeMoney(int groupSno) {
+		return new Key(SYSTEM).add(RECHARGE_PRE).add(groupSno).add(PEOPLE_TO_RECHARGE_MONEY)
 				.getId();
 	}
 
@@ -338,8 +339,8 @@ public class RedisColumn {
 				.getId();
 	}
 
-	public static byte[] rechargeList() {
-		return new Key(SYSTEM).add(RECHARGE_PRE).add(RECHARGE_LIST).getId();
+	public static byte[] rechargeList(int groupSno) {
+		return new Key(SYSTEM).add(RECHARGE_PRE).add(groupSno).add(RECHARGE_LIST).getId();
 	}
 
 	public static byte[] rechargeMoney(int sno) {

@@ -136,23 +136,23 @@ public class DinnerAction {
 		HttpServletRequest request = ServletActionContext.getRequest();
 		String groupSno = "" + request.getSession().getAttribute("groupSno");
 		if (groupSno != null && !"null".equals(groupSno)) {
-			List<People> peoples = dinner.getPeopleByGroup(Integer.parseInt(groupSno));
+			int _groupSno = Integer.parseInt(groupSno);
+			List<People> peoples = dinner.getPeopleByGroup(_groupSno);
 			request.setAttribute("peoples", peoples);
+			List<String> allTime = dinner.getOrderTimeSet(_groupSno);
+			request.setAttribute("allTime", allTime);
+			List<ReCharge> rechargs = dinner.getRecharges(_groupSno);
+			request.setAttribute("rechargs", rechargs);
 		}
-		List<String> allTime = dinner.getOrderTimeSet();
-		List<Order> orders = dinner.getOrders();
 		List<Dinner> dinners = dinner.getDinners();
 		List<Menu> menus = dinner.getMenus();
-		List<ReCharge> rechargs = dinner.getRecharges();
-		request.setAttribute("menus", menus);
-		request.setAttribute("rechargs", rechargs);
-		request.setAttribute("orders", orders);
+		request.setAttribute("menus", menus); 
 		request.setAttribute("dinners", dinners);
-		request.setAttribute("allTime", allTime);
-		return "dinner";  
+		return "dinner";
 	}
 
 	private String groupSno;
+
 	public String getGroupSno() {
 		return groupSno;
 	}
@@ -226,9 +226,10 @@ public class DinnerAction {
 		}
 		return null;
 	}
-	
-	public String setAvg() { 
-		dinner.saveArg(moneyTime,Double.parseDouble(money),Integer.parseInt(groupSno));
+
+	public String setAvg() {
+		dinner.saveArg(moneyTime, Double.parseDouble(money),
+				Integer.parseInt(groupSno));
 		HttpServletResponse response = ServletActionContext.getResponse();
 		try {
 			response.setContentType("text/html;charset=GBK");
@@ -239,38 +240,40 @@ public class DinnerAction {
 		return null;
 	}
 
-
 	/**
 	 * 根据充值金额排序的人员清单.
 	 * 
 	 * @return
 	 */
 	public String peopleByRechargeMoneyRank() {
-		List<People> p = dinner.getPeopleByRechargesRank();
 		HttpServletRequest request = ServletActionContext.getRequest();
+		String groupSno = "" + request.getSession().getAttribute("groupSno");
+		List<People> p = dinner.getPeopleByRechargesRank(Integer.parseInt(groupSno)); 
 		request.setAttribute("rankPeople", p);
 		request.setAttribute("title", "充值金额统计排行榜");
 		return "newTable";
-	} 
-	
+	}
+
 	public String peopleByCostMoneyRank() {
 		HttpServletRequest request = ServletActionContext.getRequest();
-		String groupSno = "" + request.getSession().getAttribute("groupSno"); 
-		List<People> p = dinner.getPeopleByCostsRank(Integer.parseInt(groupSno)); 
+		String groupSno = "" + request.getSession().getAttribute("groupSno");
+		List<People> p = dinner
+				.getPeopleByCostsRank(Integer.parseInt(groupSno));
 		request.setAttribute("rankPeople", p);
 		request.setAttribute("title", "消费金额统计排行榜");
 		return "newTable";
-	} 
-	
+	}
+
 	public String peopleByQianfeiMoneyRank() {
 		HttpServletRequest request = ServletActionContext.getRequest();
-		String groupSno = "" + request.getSession().getAttribute("groupSno"); 
-		List<People> p = dinner.peopleByQianfeiMoneyRank(Integer.parseInt(groupSno)); 
+		String groupSno = "" + request.getSession().getAttribute("groupSno");
+		List<People> p = dinner.peopleByQianfeiMoneyRank(Integer
+				.parseInt(groupSno));
 		request.setAttribute("rankPeople", p);
 		request.setAttribute("title", "欠费统计排行榜");
 		return "newTable";
-	} 
-	  
+	}
+
 	/**
 	 * 根据菜名的订单数的清单.
 	 * 
@@ -375,25 +378,29 @@ public class DinnerAction {
 		HttpServletResponse response = ServletActionContext.getResponse();
 		HttpServletRequest request = ServletActionContext.getRequest();
 		int userId = dinner.login(l);
-		if (userId>0) {
-			Login lll = dinner.getLoginById( userId); 
+		if (userId > 0) {
+			Login lll = dinner.getLoginById(userId);
 			request.getSession().setAttribute("groupName", lll.getGroupName());
 			request.getSession().setAttribute("userNo", lll.getSno());
 			request.getSession().setAttribute("groupSno", lll.getSno());
 			try {
 				response.setContentType("text/html;charset=GBK");
-				response.getWriter().write("欢迎进入\""+lll.getGroupName()+"\"订餐界面!");
+				response.getWriter().write(
+						"欢迎进入\"" + lll.getGroupName() + "\"订餐界面!");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		} else {
 			try {
-				Login lll = dinner.getLoginById(Integer.parseInt(groupNameList));
+				Login lll = dinner
+						.getLoginById(Integer.parseInt(groupNameList));
 				request.getSession().setAttribute("userNo", "-1");
 				request.getSession().setAttribute("groupSno", lll.getSno());
-				request.getSession().setAttribute("groupName", lll.getGroupName());
+				request.getSession().setAttribute("groupName",
+						lll.getGroupName());
 				response.setContentType("text/html;charset=GBK");
-				response.getWriter().write("验证失败，将以游客身份登陆\""+lll.getGroupName()+"\"订餐界面!");
+				response.getWriter().write(
+						"验证失败，将以游客身份登陆\"" + lll.getGroupName() + "\"订餐界面!");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

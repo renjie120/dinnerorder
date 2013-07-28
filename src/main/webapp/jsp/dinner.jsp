@@ -22,8 +22,7 @@
 	IDinner dinner = (IDinner) SpringContextUtil.getBean("dinnerImpl");
 	List<People> ps = (List<People>) request.getAttribute("peoples");
 	List<ReCharge> rechargs = (List<ReCharge>) request
-			.getAttribute("rechargs");
-	List<Order> orders = (List<Order>) request.getAttribute("orders");
+			.getAttribute("rechargs"); 
 	List<Dinner> dinners = (List<Dinner>) request
 			.getAttribute("dinners");
 	List<Menu> menus = (List<Menu>) request.getAttribute("menus");
@@ -120,10 +119,10 @@ a {
 	<table>
 		<tr>
 			<td>
-				<table>
+				<table  >
 					<tr>
 						<td>
-							<table>
+							<table style="width:300px">
 								<th colspan="2">订餐</th>
 								<tr>
 									<td>时间</td>
@@ -169,7 +168,7 @@ a {
 									<td><select id="single">
 											<option value="0">否</option>
 											<option value="1">是</option>
-									</select></td>
+									</select>(含义:有人请客多付钱等)</td>
 								</tr>
 								<tr>
 									<td colspan="2">
@@ -183,7 +182,7 @@ a {
 							if (!(userId == null || "-1".equals(userId + ""))) {
 						%>
 						<td>
-							<table>
+							<table style="width:200px">
 								<tr>
 									<th colspan="2">充值</th>
 								</tr>
@@ -221,16 +220,16 @@ a {
 							</table>
 						</td>
 						<td>
-							<table>
+							<table style="width:200px">
 								<tr>
-									<th colspan="2">添加菜单</th>
+									<th colspan="2">添加排行榜</th>
 								</tr>
 								<tr>
-									<td>菜单名</td>
+									<td>排行榜名</td>
 									<td><input id='menuName' /></td>
 								</tr>
 								<tr>
-									<td>菜单链接</td>
+									<td>后台链接</td>
 									<td><input id='menuUrl' /></td>
 								</tr>
 								<td colspan="2">
@@ -241,7 +240,7 @@ a {
 						<%
 							}%>
 						<td>
-							<table>
+						<table style="width:200px">
 								<tr>
 									<th colspan="2">趣味排行榜</th>
 								</tr>
@@ -260,7 +259,7 @@ a {
 									}
 								%>
 							</table>
-						</td>
+						</td> 
 					</tr>
 				</table>
 			</td>
@@ -272,70 +271,58 @@ a {
 			<td style="valign: top">
 				<table>
 					<%
-						//按照订餐人数的次数优先级显示出来全部的人员.
-						Set<Tuple> peopleSet = tool.getListWithScore(RedisColumn
-								.orderPeopleWithScore());
+						//按照订餐人数的次数优先级显示出来全部的人员 
 					%>
 					<tr>
-						<th colspan="<%=peopleSet.size() + 1%>">查看订餐历史</th>
+						<th colspan="<%=ps.size() + 2%>">查看订餐历史</th>
 					</tr>
 					<tr>
-						<td>时间</td>
-						<td>人均</td>
-						<%
-							Iterator<Tuple> itt = peopleSet.iterator();
-							while (itt.hasNext()) {
-								Tuple tt = itt.next();
-								int _pid = Integer.parseInt(new String(tt.getValue()));
-								double score = tt.getScore();
-								if (score < 1)
-									continue;
+						<td width='80px' algin="center">时间</td>
+						<td width='80px' algin="center">人均</td>
+						<% 
+							for (People _pp:ps) { 
+								int _pid =  _pp.getSno() ; 
 						%>
-						<td><%=tool.getKey(RedisColumn.peopleName(_pid))%></td>
+						<td width='100px'  algin="center"><%=tool.getKey(RedisColumn.peopleName(_pid))%></td>
 						<%
 							}
 						%> 
 					</tr> 
 					<%
 						//打印出来每一天的订餐的情况
+						if(allTime!=null&&allTime.size()>0)
 						for (String t : allTime) {
 							if (!tool.existsKey(RedisColumn.timeToOrder(t))) {
 								continue;
 							}
 							//得到当前分组号
-							int _gid = Integer.parseInt(groupSno);
-							List<String> groupOrderSet = dinner.getOrderByGroupAndDay(_gid,
-									t);
+							int _gid = Integer.parseInt(groupSno); 
+							String avg =  tool.getKey(RedisColumn.timeAndGroupToAvg(t, Integer.parseInt(groupSno)));
+							if(avg==null||"null".equals(avg)){
+								avg="0.0";
+							}
 					%>
 					<tr>
-						<td><%=t + "(" + dinner.getSumByDay(t) + ")"%></td>
-						<td><input id="avg" style="width:30px" value="<%=tool.getKey(RedisColumn.timeAndGroupToAvg(t, Integer.parseInt(groupSno)))%>"/><a class="set" onclick="javascript:setAvg(this,'<%=t%>','<%=groupSno%>')" /></a></td>
+						<td><%=t + "(" + dinner.getSumByDay(t,_gid) + ")"%></td>
+						<td><input id="avg" style="width:30px" value="<%=avg%>"/><a class="set" onclick="javascript:setAvg(this,'<%=t%>','<%=groupSno%>')" /></a></td>
 						<%
 							//按照订餐人数的次数优先级显示出来全部的人员.
-								Iterator<Tuple> it2 = peopleSet.iterator();
-								while (it2.hasNext()) {
-									Tuple tt = it2.next();
-									int _pid = Integer.parseInt(new String(tt.getValue()));
-									if (tt.getScore() < 1)
-										continue;
+									for (People _pp:ps) {  
+									int _pid =  _pp.getSno() ; 
 									List<String> thisDayOrders = dinner
-											.getOrderByPeopleInOneDay(_pid, t);
+											.getOrderByPeopleAndGroupInOneDay(_pid, t,_gid);
 						%>
 						<td>
 							<%
-								for (String _o : thisDayOrders) {
-											//在当天的分组的集合里面就打印出来.
-											if (groupOrderSet.indexOf(_o) != -1) {
-							%> <%=tool.getKey(RedisColumn
-									.orderDinner(Integer.parseInt(_o)))
+								for (String _o : thisDayOrders) { 
+							%> <%=tool.getKey(RedisColumn.orderDinner(Integer.parseInt(_o)))
 									+ "("
 									+ tool.getKey(RedisColumn
 											.orderMoney(Integer.parseInt(_o)))
 									+ ")"%> <img
 							src="<%=basePath%>/jsp/onError.gif"
 							onclick="javascript:deleteThisOrder('<%=_o%>')" /> <%
- 	}
- 			}
+ 	} 
  %>
 
 						</td>
@@ -348,34 +335,7 @@ a {
 						}
 					%>
 				</table>
-			</td>
-			<!-- 
-			<td style="valign:top">
-				<table>
-					<tr>
-						<th colspan="5">查看订单历史</th>
-					</tr>
-					<tr>
-						<td>时间</td>
-						<td>人员</td>
-						<td>菜名</td>
-						<td>金额</td>
-						<td>删除</td>
-					</tr>
-					<%for (Order o : orders) {%>
-					<tr>
-						<td><%=o.getTime()%></td>
-						<td><%=tool.getKey(RedisColumn.peopleName(o.getPeopleSno()))%>
-						</td>
-						<td><%=o.getDinner()%></td>
-						<td><%=o.getMoney()%></td>
-						<td><img src="<%=basePath%>/jsp/onError.gif"
-							onclick="javascript:deleteThisOrder('<%=o.getSno()%>')" /></td>
-					</tr>
-					<%}%>
-				</table>
-			</td>
-			 -->
+			</td> 
 			<td style="valign: top">
 				<table>
 					<tr>

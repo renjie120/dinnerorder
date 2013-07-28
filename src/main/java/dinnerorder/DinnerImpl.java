@@ -54,6 +54,7 @@ public class DinnerImpl implements IDinner {
 			People people = new People();
 			people.setName(order.getPeopleName());
 			peopleId = savePeople(people);
+			order.setPeopleSno(peopleId);
 		} else {
 			peopleId = order.getPeopleSno();
 		}
@@ -108,9 +109,11 @@ public class DinnerImpl implements IDinner {
 								(val + "").getBytes());
 						connection.sAdd(RedisColumn.timeToOrder(p.getTime()),
 								(val + "").getBytes());
+						connection.sAdd(RedisColumn.groupToOrder(Integer.parseInt(p.getGroupSno())),
+								(val + "").getBytes());
 						connection.sAdd(RedisColumn.orderList(),
 								(val + "").getBytes());
-						connection.sAdd(RedisColumn.orderTimeSet(),
+						connection.sAdd(RedisColumn.orderTimeSet(Integer.parseInt(p.getGroupSno())),
 								(p.getTime()).getBytes());
 						return null;
 					}
@@ -129,7 +132,7 @@ public class DinnerImpl implements IDinner {
 	public int saveRecharge(ReCharge recharge) {
 		final int val = tool.generateKey(RedisColumn.snoFactory());
 		final ReCharge p = recharge;
-		byte[] m = tool.getHashByKey(RedisColumn.peopleToRechargeMoney(),
+		byte[] m = tool.getHashByKey(RedisColumn.peopleToRechargeMoney(Integer.parseInt(p.getGroupSno())),
 				(recharge.getPeopleSno() + "").getBytes());
 		final byte[] sum;
 		if (m == null)
@@ -166,12 +169,12 @@ public class DinnerImpl implements IDinner {
 								.parseInt(p.getGroupSno())), (val + "")
 								.getBytes());
 						// 设置当前人的缴纳的定金总额.
-						connection.hSet(RedisColumn.peopleToRechargeMoney(),
+						connection.hSet(RedisColumn.peopleToRechargeMoney(Integer.parseInt(p.getGroupSno())),
 								(p.getPeopleSno() + "").getBytes(), sum);
 						connection.sAdd(
 								RedisColumn.timeToRecharge(p.getTime()),
 								(val + "").getBytes());
-						connection.sAdd(RedisColumn.rechargeList(),
+						connection.sAdd(RedisColumn.rechargeList(Integer.parseInt(p.getGroupSno())),
 								(val + "").getBytes());
 						return null;
 					}
@@ -186,8 +189,8 @@ public class DinnerImpl implements IDinner {
 	}
 
 	@Override
-	public List<ReCharge> getRecharges() {
-		Set ll = tool.getSet(RedisColumn.rechargeList());
+	public List<ReCharge> getRecharges( int groupSno) {
+		Set ll = tool.getSet(RedisColumn.rechargeList(groupSno));
 		List<ReCharge> result = new ArrayList<ReCharge>();
 		for (Object o : ll) {
 			int key = Integer.parseInt(new String((byte[]) o));
@@ -249,8 +252,8 @@ public class DinnerImpl implements IDinner {
 	}
 
 	@Override
-	public List<String> getOrderTimeSet() {
-		Set<byte[]> s = tool.getSet(RedisColumn.orderTimeSet());
+	public List<String> getOrderTimeSet(int groupSno) {
+		Set<byte[]> s = tool.getSet(RedisColumn.orderTimeSet(groupSno));
 		List<String> result = new ArrayList<String>();
 		Iterator<byte[]> it = s.iterator();
 		while (it.hasNext()) {
@@ -261,24 +264,11 @@ public class DinnerImpl implements IDinner {
 	}
 
 	@Override
-	public List<String> getOrderByPeopleInOneDay(int people, String time) {
+	public List<String> getOrderByPeopleAndGroupInOneDay(int people, String time,int groupSno) {
 		final int p = people;
 		final String t = time;
-		// 添加一个焦急
-		tool.getTemplate().execute(new RedisCallback() {
-			@Override
-			public Object doInRedis(RedisConnection connection)
-					throws DataAccessException {
-				// 保存在一个交集中.
-				connection.sInterStore(RedisColumn.peopleAndTimeToOrder(p, t),
-						RedisColumn.peopleToOrder(p),
-						RedisColumn.timeToOrder(t));
-				return null;
-			}
-
-		});
-
-		Set<byte[]> s = tool.getSet(RedisColumn.peopleAndTimeToOrder(p, t));
+		final int g =  groupSno ;  
+		Set<byte[]> s = tool.interSet(RedisColumn.peopleToOrder(p), RedisColumn.timeToOrder(t),RedisColumn.groupToOrder(g));
 		List<String> result = new ArrayList<String>();
 		Iterator<byte[]> it = s.iterator();
 		while (it.hasNext()) {
@@ -318,6 +308,8 @@ public class DinnerImpl implements IDinner {
 						connection.del(RedisColumn.orderTime(val));
 						connection.sRem(RedisColumn.peopleToOrder(peopleId),
 								(val + "").getBytes());
+						connection.sRem(RedisColumn.groupToOrder(groupSno),
+								(val + "").getBytes());
 						connection.sRem(RedisColumn.timeToOrder(time),
 								(val + "").getBytes());
 						connection.sRem(RedisColumn.orderList(),
@@ -347,7 +339,7 @@ public class DinnerImpl implements IDinner {
 				.rechargeGroup(val)));
 		final String time = tool.getKey(RedisColumn.rechargeTime(val));
 		double money = Double.parseDouble(tool.getKey(RedisColumn.rechargeMoney(val)));
-		byte[] m = tool.getHashByKey(RedisColumn.peopleToRechargeMoney(),
+		byte[] m = tool.getHashByKey(RedisColumn.peopleToRechargeMoney(groupSno),
 				(people+ "").getBytes());
 		final byte[] sum;		 
 		double d = Double.parseDouble(new String(m));
@@ -373,11 +365,11 @@ public class DinnerImpl implements IDinner {
 						// 添加人员到充值记录的映射
 						connection.sRem(RedisColumn.peopleToRecharge(people),
 								(val + "").getBytes());
-						connection.hSet(RedisColumn.peopleToRechargeMoney(),
+						connection.hSet(RedisColumn.peopleToRechargeMoney(groupSno),
 								(people + "").getBytes(), sum);
 						connection.sRem(RedisColumn.timeToRecharge(time),
 								(val + "").getBytes());
-						connection.sRem(RedisColumn.rechargeList(),
+						connection.sRem(RedisColumn.rechargeList(groupSno),
 								(val + "").getBytes());
 						return null;
 					}
@@ -408,7 +400,7 @@ public class DinnerImpl implements IDinner {
 								.getMenuName().getBytes());
 						connection.set(RedisColumn.menuUrl(val), p.getMenuUrl()
 								.getBytes());
-						connection.sAdd(RedisColumn.menuList(),
+						connection.lPush(RedisColumn.menuList(),
 								(val + "").getBytes());
 						return null;
 					}
@@ -424,7 +416,7 @@ public class DinnerImpl implements IDinner {
 
 	@Override
 	public List<Menu> getMenus() {
-		Set<byte[]> ll = tool.getSet(RedisColumn.menuList());
+		List<byte[]> ll = tool.getList(RedisColumn.menuList());
 		List<Menu> result = new ArrayList<Menu>();
 		for (Object o : ll) {
 			int key = Integer.parseInt(new String((byte[]) o));
@@ -514,10 +506,10 @@ public class DinnerImpl implements IDinner {
 	}
 
 	@Override
-	public List<People> getPeopleByRechargesRank() {
+	public List<People> getPeopleByRechargesRank(int groupSno) {
 		List<People> result = new ArrayList<People>();
 		Map<byte[], byte[]> s = tool.getMapAll(RedisColumn
-				.peopleToRechargeMoney());
+				.peopleToRechargeMoney(groupSno));
 		Iterator<Map.Entry<byte[], byte[]>> it = s.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<byte[], byte[]> m = it.next();
@@ -531,8 +523,8 @@ public class DinnerImpl implements IDinner {
 	}
 
 	@Override
-	public Double getSumByDay(String time) {
-		Set<byte[]> s = tool.getSet(RedisColumn.timeToOrder(time));
+	public Double getSumByDay(String time,int groupSno) {
+		Set<byte[]> s = tool.interSet(RedisColumn.timeToOrder(time),RedisColumn.groupToOrder(groupSno));
 		double sum = 0;
 		for (Object o : s) {
 			int key = Integer.parseInt(new String((byte[]) o));
@@ -661,21 +653,8 @@ public class DinnerImpl implements IDinner {
 	@Override
 	public List<String> getOrderByGroupAndDay(int groupSno, String time) {
 		final int p = groupSno;
-		final String t = time;
-		// 添加一个交集.
-		tool.getTemplate().execute(new RedisCallback() {
-			@Override
-			public Object doInRedis(RedisConnection connection)
-					throws DataAccessException {
-				// 保存在一个交集中.
-				connection.sInterStore(RedisColumn.groupAndTimeToOrder(p, t),
-						RedisColumn.groupToOrder(p), RedisColumn.timeToOrder(t));
-				return null;
-			}
-
-		});
-
-		Set<byte[]> s = tool.getSet(RedisColumn.groupAndTimeToOrder(p, t));
+		final String t = time;  
+		Set<byte[]> s = tool.interSet(RedisColumn.groupToOrder(p), RedisColumn.timeToOrder(t));
 		List<String> result = new ArrayList<String>();
 		Iterator<byte[]> it = s.iterator();
 		while (it.hasNext()) {
@@ -795,27 +774,15 @@ public class DinnerImpl implements IDinner {
 	@Override
 	public Set<byte[]> getOrderByGroupAndPeople(int groupSno, int people) {
 		final int g = groupSno;
-		final int p = people;
-		// 添加一个交集.
-		tool.getTemplate().execute(new RedisCallback() {
-			@Override
-			public Object doInRedis(RedisConnection connection)
-					throws DataAccessException {
-				// 保存在一个交集中.
-				connection.sInterStore(RedisColumn.groupAndPeopleToOrder(g, p),
-						RedisColumn.groupToOrder(g),
-						RedisColumn.peopleToOrder(p));
-				return null;
-			}
-		});
-		return tool.getSet(RedisColumn.groupAndPeopleToOrder(g, p));
+		final int p = people; 
+		return tool.interSet(RedisColumn.groupToOrder(g),RedisColumn.peopleToOrder(p));
 	}
 
 	@Override
 	public List<People> peopleByQianfeiMoneyRank(int groupSno) {
 		List<People> costrank  = getPeopleByCostsRank(groupSno);
 		Map<byte[], byte[]> s = tool.getMapAll(RedisColumn
-				.peopleToRechargeMoney());
+				.peopleToRechargeMoney(groupSno));
 		for (People p : costrank) {
 			if(s.get((p.getSno()+"").getBytes())!=null){
 				double chargeMoney = Double.parseDouble(new String(s.get((p.getSno()+"").getBytes())));
