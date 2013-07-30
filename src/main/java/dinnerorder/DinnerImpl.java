@@ -196,6 +196,7 @@ public class DinnerImpl implements IDinner {
 			int key = Integer.parseInt(new String((byte[]) o));
 			result.add(getReChargeById(key));
 		}
+		Collections.sort(result);
 		return result;
 	}
 
@@ -768,6 +769,7 @@ public class DinnerImpl implements IDinner {
 			_p.setName(tool.getKey(RedisColumn.peopleName(_p.getSno()))); 
 			result.add(_p);
 		} 
+		Collections.sort(result);
 		return result;
 	}
 

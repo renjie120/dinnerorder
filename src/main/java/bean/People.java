@@ -47,7 +47,14 @@ public class People implements Serializable, Comparable {
 			return -1;
 		} else if (d < 0) {
 			return 1;
-		} else
-			return 0;
+		} else{
+			int s = this.sno - ((People) o).getSno();
+			if(s>0)
+				return 1;
+			else if(s<0)
+				return -1;
+			else
+				return 0; 
+		}
 	}
 }
