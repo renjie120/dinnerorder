@@ -1,0 +1,97 @@
+
+.icon{
+	 height:44px; 
+	 width:90px;
+	 background: url(../jsp/logo.png) no-repeat 0 2px; 
+	 float:left;
+	 }	
+.welcome{ 
+     height:50px;
+	 width:100px; 
+	 line-height:50px;
+	  vertical-align: middle; 
+	  font-size:24px; 
+	  color:#FFF; 
+	  float:right}
+.main{
+	margin:0px;
+	height:100%;
+	color: #36F;
+	padding:0px;
+	line-height:1.5em;
+	border:#000 1px;
+	background-color:#CCC;
+	overflow:hidden;
+}
+div.header,div.buttom{
+	border:#00F 1px;
+	margin:0px;
+	background:url(../jsp/head_bg.jpg) repeat-x;
+	padding:15px;
+	clear:both;
+	color:white;
+	height:50px;
+}
+div.buttom{
+	padding:0px;
+	}
+	
+.left{
+	float:left;
+	margin:0px;
+	width:250px;
+	padding:5px 10px;
+	height:auto;
+	font-size:18px;
+	}
+.right{
+	float:right;
+	width:250px;
+	padding:5px;
+	height:700px;
+	}
+.center{
+	padding:5px;
+	margin-left:270px;
+	margin-right:270px;
+	width:auto;
+	background-color: #CCC;
+	height:700px;
+	}
+.titl{
+	text-align:center;
+	height:30px;
+	font:Verdana, Geneva, sans-serif;
+	font-size:18px;
+	line-height:30px; 
+	font-weight:bold;
+	color:red;}
+.tb3{
+	background-color:#CCC;
+	overflow:auto !important;
+	}
+.tb3 td{
+	font-size:12px;
+	color: #000;
+	} 
+a:link {
+ color: #33CC33;
+ text-decoration: none;
+}
+a:visited {
+ text-decoration: none;
+}
+a:active {
+ text-decoration: none;
+}
+a {
+ text-decoration: underline;
+ cursor : pointer;
+}
+
+.tb3 tbody{
+	text-align:center;
+	font-size:18px;
+     }
+.tb3 th{ font-size:18px;}
+.tb2 th{ font-size:18px; color:#333;}
