@@ -3,6 +3,7 @@ package dinnerorder;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -198,7 +199,7 @@ public class DinnerImpl implements IDinner {
 
 	@Override
 	public List<ReCharge> getRecharges(int groupSno) {
-		Set ll = tool.getSet(RedisColumn.rechargeList(groupSno));
+		Collection ll = tool.sortSet(RedisColumn.rechargeList(groupSno),ReCharge.class);
 		List<ReCharge> result = new ArrayList<ReCharge>();
 		for (Object o : ll) {
 			int key = Integer.parseInt(new String((byte[]) o));

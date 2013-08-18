@@ -2,13 +2,15 @@ package bean;
 
 import java.io.Serializable;
 
+import org.springframework.data.redis.connection.SortParameters;
+
 /**
  * 充值记录.
  * 
  * @author lsq
  * 
  */
-public class ReCharge implements Serializable, Comparable {
+public class ReCharge implements Serializable, Comparable ,SortParameters{
 	// 序列号
 	private static final long serialVersionUID = 1L;
 	private int peopleSno;
@@ -67,5 +69,35 @@ public class ReCharge implements Serializable, Comparable {
 			return -1;
 		else
 			return 0;
+	}
+
+	@Override
+	public Order getOrder() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean isAlphabetic() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public byte[] getByPattern() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public byte[][] getGetPattern() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Range getLimit() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

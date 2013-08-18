@@ -12,6 +12,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisZSetCommands.Tuple;
+import org.springframework.data.redis.connection.SortParameters;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -132,6 +133,21 @@ public class BaseRedisTool {
 	}
 	
 	/**
+	 * 返回排序好的set集合.
+	 * @param k
+	 * @return
+	 */
+	public List<byte[]> sortSet(final byte[] k,final SortParameters p) {
+		return template.execute(new RedisCallback<List<byte[]>>() {
+			@Override
+			public List<byte[]> doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				return connection.sort(k,p);
+			}
+		});
+	}
+	
+	/**
 	 * 返回两个set的交集
 	 * @param k
 	 * @param k2
@@ -154,13 +170,29 @@ public class BaseRedisTool {
 		byte[] b = template.execute(new RedisCallback<byte[]>() {
 			@Override
 			public byte[] doInRedis(RedisConnection connection)
-					throws DataAccessException {
+					throws DataAccessException {  
 				return connection.get(k);
 			}
 		});
 		if (b != null)
 			return new String(b);
 		return null;
+	}
+	
+	/**
+	 * 设置一个键存在的时间.
+	 * @param key
+	 * @param time
+	 * @return
+	 */
+	public boolean expire(final byte[] key,final long time){
+		return  template.execute(new RedisCallback<Boolean>() {
+			@Override
+			public Boolean doInRedis(RedisConnection connection)
+					throws DataAccessException { 
+				return connection.expire(key, time);
+			}
+		});
 	}
 
 	/**
