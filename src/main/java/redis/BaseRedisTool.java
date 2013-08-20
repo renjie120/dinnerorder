@@ -66,6 +66,119 @@ public class BaseRedisTool {
 	}
 
 	/**
+	 * 
+	 * 
+	 * <pre>
+	 * 添加一个字符串键值到redis中.
+	 * 如果存在这个key就覆盖.
+	 * </pre>
+	 * @param key 键
+	 * @param value 值
+	 */
+	public void setStr(String key,String value){
+		addKey("str",key,value,null);
+	}	
+	
+	/**
+	 * 
+	 * 
+	 * <pre>
+	 * 添加一个字符串键值到redis中.
+	 * 如果已经存在这个key就不添加.
+	 * </pre>
+	 * @param key
+	 * @param value
+	 */
+	public void setStrNx(String key,String value){
+		addKey("strnx",key,value,null);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * <pre>
+	 * 添加一个值到list的前端.
+	 * </pre>
+	 * @param key list的key
+	 * @param value 值
+	 */
+	public void lPush(String key,String value){
+		addKey("listL",key,value,null);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * <pre>
+	 * 添加一个值到list的末尾.
+	 * </pre>
+	 * @param key  list的key
+	 * @param value 值
+	 */
+	public void rPush(String key,String value){
+		addKey("listR",key,value,null);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * <pre>
+	 * 添加到一个集合中.
+	 * </pre>
+	 * @param key
+	 * @param value
+	 */
+	public void addSet(String key,String value){
+		addKey("set",key,value,null);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * <pre>
+	 * 添加一个值到权重集合中.
+	 * </pre>
+	 * @param key 键
+	 * @param value 值
+	 * @param score 权重
+	 */
+	public void addZSet(String key,String value,double score){
+		addKey("zset",key,value,score+"");
+	}
+	
+	
+	/**
+	 * 
+	 * 
+	 * <pre>
+	 * 添加一个值到hash中.
+	 * key重复的话就覆盖以前的值.
+	 * </pre>
+	 * @param key 键
+	 * @param hKey hash的键
+	 * @param hVal hash的值.
+	 */
+	public void addHash(String key,String hKey,String hVal){
+		addKey("hash",key,hKey,hVal);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * <pre>
+	 * 添加一个值到hash中.
+	 * key已经存在就不添加.
+	 * </pre>
+	 * @param key 键
+	 * @param hKey hash的键
+	 * @param hVal hash的值.
+	 */
+	public void addHashNx(String key,String hKey,String hVal){
+		addKey("hashnx",key,hKey,hVal);
+	}
+	 
+	
+	/**
 	 * 按照顺序返回有权重的list.
 	 * 
 	 * @param k
@@ -82,6 +195,55 @@ public class BaseRedisTool {
 		});
 	}
 
+	/**
+	 * 删除set里面的值.
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	public void removeSetValue(String key, String value) {
+		if (key == null || value == null)
+			return;
+		final String keykey = key;
+		final String va = value;
+
+		template.execute(new RedisCallback() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				connection.sRem(keykey.getBytes(), va.getBytes());
+				return null;
+			}
+
+		});
+	}
+	/**
+	 * 删除set里面的一个值
+	* @methodName: removeSetValue 
+	* @description : TODO
+	* @author：zhangqiang
+	* @date： 2013-8-13 上午11:36:29
+	* @param key
+	* @param value void
+	 */
+	@SuppressWarnings("unchecked")
+	public void removeSetValue(byte[] key, String value) {
+		if (key == null || value == null)
+			return;
+		final byte[] keykey = key;
+		final String va = value;
+
+		template.execute(new RedisCallback() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				connection.sRem(keykey, va.getBytes());
+				return null;
+			}
+
+		});
+	}
+ 
 	/**
 	 * 返回指定排名的元素
 	 * 
@@ -697,29 +859,7 @@ public class BaseRedisTool {
 
 		});
 	}
-
-	/**
-	 * 删除set里面的值.
-	 * 
-	 * @param key
-	 * @param value
-	 */
-	public void removeSetValue(String key, String value) {
-		if (key == null || value == null)
-			return;
-		final String keykey = key;
-		final String va = value;
-
-		template.execute(new RedisCallback() {
-			@Override
-			public Object doInRedis(RedisConnection connection)
-					throws DataAccessException {
-				connection.sRem(keykey.getBytes(), va.getBytes());
-				return null;
-			}
-
-		});
-	}
+ 
 
 	/**
 	 * 删除hash里面的值.
