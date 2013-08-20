@@ -44,6 +44,14 @@
 			$('img[tag!=1]').remove();
 		}
 	}); 
+	function getOrdersByPeople(peopleId){
+		window
+		.open(
+				'dinner!getPeopleOrders.action?peopleSno=' + peopleId,
+				'newwindow',
+				'height=600, width=400, top=0, left=0, toolbar=no, menubar=no, scrollbars=auto,resizable=no,location=no, status=no'); 
+	}
+	
 </script>
 </head>
 <body>
@@ -248,7 +256,7 @@
 						for (People _pp:ps) { 
 							int _pid =  _pp.getSno() ; 
 						%>
-						<th ><%=tool.getKey(RedisColumn.peopleName(_pid))%></th>
+						<th ><a onclick="getOrdersByPeople('<%=_pid%>')"><%=tool.getKey(RedisColumn.peopleName(_pid))%></a></th>
 						<%
 							}
 						%> 
@@ -302,7 +310,7 @@
 						for (People _pp:ps) { 
 							int _pid =  _pp.getSno() ; 
 						%>
-						<th><font size="2"><%=tool.getKey(RedisColumn.peopleName(_pid))%></font></th>
+						<th><font size="2"><a url="#" onclick="getOrdersByPeople('<%=_pid%>')"><%=tool.getKey(RedisColumn.peopleName(_pid))%></a></font></th>
 						<%
 							}
 						%> 

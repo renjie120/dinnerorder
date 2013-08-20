@@ -2,7 +2,7 @@ package bean;
 
 import java.io.Serializable;
 
-public class Order implements Serializable {
+public class Order implements Serializable, Comparable {
 	// 序列号
 	private static final long serialVersionUID = 1L;
 	private String time;
@@ -11,6 +11,7 @@ public class Order implements Serializable {
 	private int sno;
 	private String dinnerName;
 	private String groupSno;
+
 	public String getGroupSno() {
 		return groupSno;
 	}
@@ -19,8 +20,8 @@ public class Order implements Serializable {
 		this.groupSno = groupSno;
 	}
 
-
 	private int dinnerNameList;
+
 	public String getDinnerName() {
 		return dinnerName;
 	}
@@ -28,7 +29,6 @@ public class Order implements Serializable {
 	public void setDinnerName(String dinnerName) {
 		this.dinnerName = dinnerName;
 	}
- 
 
 	public int getDinnerNameList() {
 		return dinnerNameList;
@@ -37,7 +37,6 @@ public class Order implements Serializable {
 	public void setDinnerNameList(int dinnerNameList) {
 		this.dinnerNameList = dinnerNameList;
 	}
-
 
 	private String peopleName;
 
@@ -65,7 +64,7 @@ public class Order implements Serializable {
 		this.sno = sno;
 	}
 
-	private String isSingle; 
+	private String isSingle;
 
 	public String getIsSingle() {
 		return isSingle;
@@ -99,6 +98,22 @@ public class Order implements Serializable {
 
 	public void setMoney(String money) {
 		this.money = money;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		int s = this.time.compareTo(((Order) o).getTime());
+		if (s != 0)
+			return s;
+		else {
+			s = this.sno - ((Order) o).getSno();
+			if (s > 0)
+				return 1;
+			else if (s < 0)
+				return -1;
+			else
+				return 0;
+		}
 	}
 
 }

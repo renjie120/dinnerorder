@@ -185,6 +185,18 @@ public interface IDinner {
 	public List<People> getPeopleByCostsRank(int groupSno); 
 	
 	/**
+	 * 
+	 * 
+	 * <pre>
+	 * 得到人员的消费记录.
+	 * </pre>
+	 * @param groupSno
+	 * @param peopleName
+	 * @return
+	 */
+	public List<Order> getOrdersByPeople(int groupSno,int peopleSno); 
+		
+	/**
 	 * 查询欠费排行榜.
 	 * @param groupSno
 	 * @return

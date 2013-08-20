@@ -15,6 +15,7 @@
 			+ request.getServerName() + ":" + request.getServerPort()
 			+ path + "/";
 	List<People> ps = (List<People>) request.getAttribute("rankPeople");
+	List<Order> orders = (List<Order>) request.getAttribute("peopleOrders");
 	String title = (String) request.getAttribute("title");
 	List<Dinner> dinners = (List<Dinner>) request
 			.getAttribute("rankDinner");
@@ -67,15 +68,39 @@ input {
 </style>
 </head>
 <body>
+	<div style="width:100%;height:100%;overflow:auto;">
 	<table>
-		<tr><th colspan="2"><h3><%=title%></h3></th></tr>
+		<tr><th colspan="4"><h3><%=title%></h3></th></tr>
+		<%
+		if(orders!=null&&orders.size()>0){
+		%>
+		<tr>
+			<td>订餐时间</td>
+			<td>菜名</td>
+			<td>金额</td>
+			<td>是否单点</td>
+		</tr>
+		<%
+		int index = 1;
+			for (Order p : orders) {
+		%>
+		<tr>
+			<td><%="("+(index++)+")"+p.getTime()%></td>
+			<td><%="("+p.getSno()+")"+p.getDinnerName()%></td>
+			<td><%=p.getMoney()%></td>
+			<td><%="1".equals(p.getIsSingle())?"是":"否"%></td>
+		</tr>
+		<%
+			}
+		}
+		%>
 		<%
 		if(ps!=null&&ps.size()>0)
 			for (People p : ps) {
 		%>
 		<tr>
 			<td><%=p.getName()%></td>
-			<td><%=p.getRechargeSum()%></td>
+			<td colspan="3"><%=p.getRechargeSum()%></td>
 		</tr>
 		<%
 			}
@@ -86,12 +111,13 @@ input {
 		%>
 		<tr>
 			<td><%=p.getDinnerName()%></td>
-			<td><%=p.getScore()%></td>
+			<td  colspan="3"><%=p.getScore()%></td>
 		</tr>
 		<%
 			}
 		%>
-		<tr><td colspan="2" style="align:center"><button onclick="window.close();">关闭</button></td></tr>
+		<tr><td colspan="4" style="align:center"><button onclick="window.close();">关闭</button></td></tr>
 	</table>
+	</div>
 </body>
 </html>

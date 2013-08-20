@@ -253,6 +253,24 @@ public class DinnerAction {
 		request.setAttribute("title", "充值金额统计排行榜");
 		return "newTable";
 	}
+	
+	/**
+	 * 
+	 * 
+	 * <pre>
+	 * 返回一个人的全部的订单记录.
+	 * </pre>
+	 * @return
+	 */
+	public String getPeopleOrders() {
+		HttpServletRequest request = ServletActionContext.getRequest();
+		String groupSno = "" + request.getSession().getAttribute("groupSno");
+		String peopleSno = request.getParameter("peopleSno");
+		List<Order> p = dinner.getOrdersByPeople(Integer.parseInt(groupSno),Integer.parseInt(peopleSno)); 
+		request.setAttribute("peopleOrders", p);
+		request.setAttribute("title", "消费记录");
+		return "newTable";
+	}
 
 	public String peopleByCostMoneyRank() {
 		HttpServletRequest request = ServletActionContext.getRequest();

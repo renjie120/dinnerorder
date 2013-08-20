@@ -199,13 +199,13 @@ public class DinnerImpl implements IDinner {
 
 	@Override
 	public List<ReCharge> getRecharges(int groupSno) {
-		Collection ll = tool.sortSet(RedisColumn.rechargeList(groupSno),ReCharge.class);
+		Collection ll = tool.getSet(RedisColumn.rechargeList(groupSno));
 		List<ReCharge> result = new ArrayList<ReCharge>();
 		for (Object o : ll) {
 			int key = Integer.parseInt(new String((byte[]) o));
 			result.add(getReChargeById(key));
 		}
-		Collections.reverse(result);
+		Collections.sort(result);
 		return result;
 	}
 
@@ -831,6 +831,32 @@ public class DinnerImpl implements IDinner {
 		}
 		Collections.sort(costrank);
 		return costrank;
+	}
+
+	@Override
+	public List<Order> getOrdersByPeople(int groupSno, int peopleSno) {
+		List<Order> result = new ArrayList<Order>();
+		Set<byte[]> orders = getOrderByGroupAndPeople(groupSno,peopleSno);  
+		for (byte[] o : orders) {
+			Order order = new Order();
+			int orderId = Integer.parseInt(new String(o));
+			String cost = tool.getKey(RedisColumn.orderCost(orderId));
+			String cost2 = tool.getKey(RedisColumn.orderMoney(orderId));
+			order.setTime(tool.getKey(RedisColumn.orderTime(orderId))); 
+			// 如果没有设置平均消费，就从实际点餐金额中计算.
+			if (cost != null){ 
+				order.setMoney(cost);
+			}
+			else{
+				order.setMoney(cost2);
+			} 
+			order.setDinnerName(tool.getKey(RedisColumn.orderDinner(orderId)));
+			order.setIsSingle(tool.getKey(RedisColumn.orderSingle(orderId)));
+			order.setSno(orderId);
+			result.add(order);
+		}  
+		Collections.sort(result);
+		return result;
 	}
 
 }
